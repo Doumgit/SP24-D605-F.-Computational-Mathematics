@@ -1,0 +1,55 @@
+---
+title: "Chapter 1, Exercise 9, Page 36"
+author: "Souleymane Doumbia"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Problem Statement
+
+A student must choose exactly two out of three electives: art, French, and mathematics. The probabilities of choosing these electives are as follows:
+- Art with probability $\frac{5}{8}$
+- French with probability $\frac{5}{8}$
+- Art and French together with probability $\frac{1}{4}$
+
+We aim to find:
+1. The probability that the student chooses mathematics.
+2. The probability that the student chooses either art or French.
+
+## Definitions and Formulas
+
+Let's define the events:
+- $A$: Choosing art.
+- $F$: Choosing French.
+- $M$: Choosing mathematics.
+- $A \cap F$: Choosing both art and French.
+
+Given probabilities:
+- $P(A) = \frac{5}{8}$
+- $P(F) = \frac{5}{8}$
+- $P(A \cap F) = \frac{1}{4}$
+
+To find the probability of choosing either art or French, we use the formula for the union of two events:
+$$P(A \cup F) = P(A) + P(F) - P(A \cap F)$$
+
+### Probability of Choosing Either Art or French
+
+```{r}
+P_A <- 5/8
+P_F <- 5/8
+P_A_and_F <- 1/4
+
+# Probability of choosing either art or French
+P_A_or_F <- P_A + P_F - P_A_and_F
+
+P_A_or_F
+```
+
+
+# Explanation on Determining the Probability of Choosing Mathematics
+
+Determining the probability of choosing mathematics ($P(M)$) from the given information is challenging because the provided probabilities focus solely on the choices of art and French, including their joint selection, without directly addressing mathematics. The constraints—that two courses must be chosen and the specific interaction between choosing art and French—are known, but how these choices impact the selection of mathematics is not specified. Essentially, without knowing either the explicit probability of choosing mathematics directly or additional details on how the choices of art and French influence the likelihood of choosing mathematics, we cannot accurately calculate $P(M)$. The missing piece is a direct connection or statistical relationship between choosing mathematics and the other electives within the given constraints of course selection.
