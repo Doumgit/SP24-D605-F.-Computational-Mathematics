@@ -1,0 +1,524 @@
+---
+title: "Probability Distributions"
+author: "Souleymane Doumbia"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## 1- Bayesian Analysis of MNR HIV-1 Test
+
+Given:
+
+- Prevalence of MNR HIV-1, \(P(\text{Disease})\): 0.1% or 0.001
+
+- Sensitivity, \(P(\text{Positive} | \text{Disease})\): 96%
+
+- Specificity, \(P(\text{Negative} | \text{No Disease})\): 98%
+
+### Calculating the Probability of Having the Disease Given a Positive Test
+
+The probability that an individual who tests positive actually has the disease, \(P(\text{Disease} | \text{Positive})\), is calculated using Bayes' theorem:
+
+\[P(\text{Disease} | \text{Positive}) = \frac{P(\text{Positive} | \text{Disease}) \cdot P(\text{Disease})}{P(\text{Positive})}\]
+
+Where:
+
+\[P(\text{Positive}) = P(\text{Positive} | \text{Disease}) \cdot P(\text{Disease}) + P(\text{Positive} | \text{No Disease}) \cdot P(\text{No Disease})\]
+
+To find \(P(\text{Disease} | \text{Positive})\), we first calculate \(P(\text{Positive})\); Then it yields a \(P(\text{Disease} | \text{Positive})\) of approximately 4.58\%  **(Check below)**.
+
+```{r Probability of Having the Disease Given a Positive Test}
+# Given values
+prevalence <- 0.001
+sensitivity <- 0.96
+specificity <- 0.98
+
+# Calculating P(No Disease)
+p_no_disease <- 1 - prevalence
+
+# Calculating P(Positive | No Disease)
+p_positive_no_disease <- 1 - specificity
+
+# Calculating P(Positive)
+p_positive <- (sensitivity * prevalence) + (p_positive_no_disease * p_no_disease)
+
+# Calculating P(Disease | Positive)
+p_disease_given_positive <- (sensitivity * prevalence) / p_positive
+p_disease_given_positive
+```
+
+
+
+###  Estimating the Total First-Year Cost for Treating 100,000 Individuals
+We calculate the total first-year cost for treating 100,000 individuals, taking into account the cost of testing and the treatment cost for true positive cases. The total first-year cost is approximately \$109.6 million **(as gotten in the result below)**.
+
+```{r Calculating total first-year cost}
+population <- 100000
+test_cost <- 1000
+treatment_cost_per_positive_case <- 100000
+
+# Calculating expected number of positive tests
+expected_positives <- p_positive * population
+
+# Calculating expected number of true positives
+true_positives <- p_disease_given_positive * expected_positives
+
+# Calculating total first-year cost
+total_cost <- (true_positives * treatment_cost_per_positive_case) + (population * test_cost)
+total_cost
+```
+
+* * *
+
+
+## 2- Binomial Distribution of Joint Commission Inspections
+
+### Some Definitions we will use
+
+- \(n = 24\): the number of trials (months).
+
+- \(p = 0.05\): the probability of success on a single trial (receiving an inspection).
+
+- \(k\): the number of successes (number of inspections received).
+
+The probability mass function (PMF) of a binomial distribution, which gives the probability of receiving exactly \(k\) successes (inspections) out of \(n\) trials (months), is given by:
+
+\[P(X = k) = \binom{n}{k} p^k (1-p)^{n-k}\]
+
+Where \(\binom{n}{k}\) is the binomial coefficient, representing the number of ways to choose \(k\) successes out of \(n\) trials.
+
+### Questions to answer
+
+1. What is the probability of exactly 2 inspections in 24 months?
+2. What is the probability of 2 or more inspections in 24 months?
+3. What is the probability of fewer than 2 inspections in 24 months?
+4. What is the expected number of inspections in 24 months?
+5. What is the standard deviation of the number of inspections in 24 months?
+
+The expected number of inspections (\(E[X]\)) and the standard deviation (\(\sigma\)) for a binomial distribution are calculated as follows:
+
+- \(E[X] = np\)
+
+- \(\sigma = \sqrt{np(1-p)}\)
+
+### Calculating Probabilities (answering questions above)
+
+#### Probability of Exactly 2 Inspections: is **22%**
+```{r exact-two-inspections}
+n <- 24
+p <- 0.05
+k <- 2
+
+prob_exact_2 <- dbinom(k, n, p)
+
+prob_exact_2
+```
+
+#### Probability of 2 or More Inspections: is **34%**
+```{r Probability-of-2-or-more-inspections}
+prob_2_or_more <- 1 - pbinom(1, n, p)
+
+prob_2_or_more
+```
+
+#### Probability of Fewer Than 2 Inspections: is **66%**
+```{r Probability-of-fewer-than-2-inspections}
+prob_fewer_than_2 <- pbinom(1, n, p)
+
+prob_fewer_than_2
+```
+
+
+### Expected Number of Inspections and Standard Deviation:
+```{r}
+# Expected number of inspections
+expected_inspections <- n * p
+
+# Standard deviation
+sd_inspections <- sqrt(n * p * (1 - p))
+
+list(Expected = expected_inspections, Standard_deviation = sd_inspections)
+```
+
+* * *
+
+## 3- Poisson Distribution for Family Practice Clinic
+
+### Some definitions we will use here
+
+The arrival of patients at the family practice clinic follows a Poisson distribution with the following parameters:
+
+- Let \(\lambda = 10\) be the average rate of arrival (patients per hour).
+
+- Let \(k\) be the number of arrivals (patients) we're interested in.
+
+The probability mass function (PMF) of the Poisson distribution, giving the probability of observing exactly \(k\) arrivals in a given period, is:
+
+\[P(X = k) = \frac{e^{-\lambda} \lambda^k}{k!}\]
+
+For a Poisson distribution, the expected number of arrivals (\(E[X]\)) is \(\lambda\), and the standard deviation (\(\sigma\)) is \(\sqrt{\lambda}\).
+
+Given that each provider can see 24 patients a day, and assuming an 8-hour workday, the total capacity per day for all providers combined is 3 providers \(\times\) 24 patients/provider = 72 patients.
+
+### Questions to answer
+
+1. Probability of exactly 3 arrivals in one hour.
+2. Probability of more than 10 arrivals in one hour.
+3. Expected number of arrivals in 8 hours.
+4. Standard deviation of the number of arrivals in one hour.
+5. Percent utilization of the three family practice providers.
+
+#### Probability of Exactly 3 Arrivals in One Hour
+
+```{r probability-exactly-3}
+lambda <- 10
+k <- 3
+
+prob_exact_3 <- dpois(k, lambda)
+
+prob_exact_3
+```
+
+#### Probability of More Than 10 Arrivals in One Hour
+```{r Probability-of-more-than-10-arrivals}
+prob_more_than_10 <- 1 - ppois(10, lambda)
+
+prob_more_than_10
+```
+
+#### Expected Arrivals and Standard Deviation
+```{r Expected-Arrivals-and-Standard-Deviation}
+# Expected number of arrivals in one hour is lambda
+expected_arrivals_1hr <- lambda
+
+# Standard deviation for one hour
+sd_arrivals_1hr <- sqrt(lambda)
+
+# Expected number of arrivals in 8 hours
+expected_arrivals_8hr <- lambda * 8
+
+
+list(Expected_in_1hour = expected_arrivals_1hr, Standard_deviation = sd_arrivals_1hr, Expected_in_8hours = expected_arrivals_8hr )
+```
+
+
+#### Percent Utilization and Recommendations:
+```{r Percent-utilization}
+# Total patient capacity for all providers
+total_capacity <- 3 * 24
+expected_demand_8hr <- expected_arrivals_8hr # Is also expected demand in 8 hours
+
+# Percent utilization
+percent_utilization <- (expected_demand_8hr / total_capacity) * 100
+
+percent_utilization
+```
+
+**Recommendations:** adjusting the number of providers; scheduling to optimize operations; ensuring that the clinic can handle the expected patient volume efficiently. 
+
+* * *
+
+
+
+## 4- Hypergeometric Distribution of Trip Selection
+
+### Some concepts of hypergeometric
+
+Employing the hypergeometric distribution, which is suitable for modeling the probability of a given number of successes (nurse selections) without replacement from a finite population. In this scenario:
+
+- Total number of workers, \(N = 30\)
+
+- Number of nurses (successes in the population), \(K = 15\)
+
+- Number of draws (people sent on trips), \(n = 6\)
+
+- Number of observed successes (nurses sent on trips), \(k = 5\)
+
+The probability mass function (PMF) of the hypergeometric distribution is:
+
+\[P(X = k) = \frac{{\binom{K}{k} \binom{N-K}{n-k}}}{{\binom{N}{n}}}\]
+
+where:
+
+- \(\binom{K}{k}\) is the number of ways to choose \(k\) successes out of \(K\) possible successes,
+
+- \(\binom{N-K}{n-k}\) is the number of ways to choose \(n-k\) failures out of \(N-K\) possible failures,
+
+- \(\binom{N}{n}\) is the total number of ways to choose \(n\) workers out of \(N\).
+
+### Questions to answer
+
+1. What is the probability that the subordinate would have selected five nurses for the trips if they acted innocently?
+2. How many nurses would we have expected the subordinate to send on the trips?
+3. How many non-nurses would we have expected the subordinate to send?
+
+For the hypergeometric distribution:
+- The expected number of nurses sent on the trips is calculated as \(E[\text{Nurses}] = n \frac{K}{N}\).
+
+- The expected number of non-nurses sent on the trips is \(E[\text{Non-nurses}] = n \frac{N-K}{N}\).
+
+### Calculating the Probability and Expected Numbers
+
+#### Probability of Selecting Five Nurses
+
+```{r probability-five-nurses}
+N <- 30
+K <- 15
+n <- 6
+k <- 5
+
+# Probability of selecting 5 nurses
+prob_select_5_nurses <- dhyper(k, K, N-K, n)
+
+prob_select_5_nurses
+```
+
+
+#### Expected Number of Nurses and Non-Nurses Sent on Trips
+```{r Expected Number of Nurses and Non-Nurses Sent on Trips}
+# Expected number of nurses sent on trips
+expected_nurses <- n * (K / N)
+
+# Expected number of non-nurses sent on trips
+expected_non_nurses <- n * ((N - K) / N)
+
+list(Expected_nurses = expected_nurses, Expected_non_nurses = expected_non_nurses)
+```
+
+* * *
+
+
+
+## 5- Geometric Distribution of Car Crash Injury Risk
+
+### Definitions and Scenario
+
+In analyzing the risk associated with prolonged driving, we consider the probability of being seriously injured in a car crash, which is about 0.1% per hour (\(p = 0.001\)). This scenario is well-modeled by the geometric distribution, which describes the probability of observing the first success (in this case, a serious injury) on the \(k\)-th trial (hour of driving).
+
+The probability mass function (PMF) for the geometric distribution is given by:
+
+\[P(X = k) = (1 - p)^{k-1}p\]
+
+where:
+
+- \(k\) is the trial number at which the first success occurs.
+
+- \(p\) is the probability of success on any given trial.
+
+For the geometric distribution, the expected number of trials (\(E[X]\)) until the first success is \(\frac{1}{p}\), and this gives us the average time until an injury in hours.
+
+### Questions and Calculations
+
+1. What is the probability that the driver will be seriously injured during the course of the year?
+
+2. What is the probability that the driver will be seriously injured in the course of 15 months?
+
+3. What is the expected number of hours that a driver will drive before being seriously injured?
+
+4. Given that a driver has driven 1200 hours, what is the probability that he or she will be injured in the next 100 hours?
+
+
+#### Probability of Being Seriously Injured Within a Year (1200 Hours)
+
+Considering a driver is required to traverse an area for 1200 hours in a year:
+
+```{r injury-probability-year}
+p <- 0.001
+hours_year <- 1200
+
+# Probability of being injured at least once in the year
+prob_injury_year <- 1 - (1 - p)^hours_year
+
+prob_injury_year
+```
+
+
+#### Probability of Being Seriously Injured Within 15 Months (1500 Hours)
+```{r prob-injury-within-15-months}
+hours_15_months <- 1500
+
+prob_injury_15_months <- 1 - (1 - p)^hours_15_months
+
+prob_injury_15_months
+```
+
+
+#### Expected Number of Hours Before Being Seriously Injured
+```{r expected time before experiencing a serious injury}
+# Average time until a serious injury
+expected_hours_before_injury <- 1 / p
+
+expected_hours_before_injury
+```
+
+
+#### Probability of Being Injured in the Next 100 Hours After Driving 1200 Hours
+
+Given that a driver has already driven 1200 hours without injury, the probability of being injured in the next 100 hours is the same as being injured in any 100-hour period:
+
+```{r Probability of Being Injured in the Next 100 Hours}
+next_100_hours <- 100
+
+# Probability of being injured in the next 100 hours
+prob_injury_next_100 <- 1 - (1 - p)^next_100_hours
+
+prob_injury_next_100
+```
+
+* * *
+
+
+
+## 6- Generator Failures
+
+Given that a hospital's primary generator fails on average once every 1000 hours, we apply the Poisson distribution to model the probability of the generator failing more than twice in a 1000-hour period.
+
+- Average rate of failure, \(\lambda = 1\) (since the generator fails once in 1000 hours).
+
+### Calculating the Probability and Expected Value
+
+#### Probability of More Than Two Failures in 1000 Hours
+
+To find the probability of more than two failures, we calculate the complement of the probability of 0, 1, or 2 failures:
+
+```{r probability-more-than-two-failures}
+lambda <- 1
+
+# Probability of 0, 1, or 2 failures (less than or equal to 2 failures)
+prob_up_to_two_failures <- ppois(2, lambda)
+
+# Probability of more than two failures
+prob_more_than_two_failures <- 1 - prob_up_to_two_failures
+
+prob_more_than_two_failures
+```
+
+
+#### Expected Number of Failures in 1000 Hours
+ As in the poisson distribution, the expected number of generator failures in a 1000-hour period can be directly taken as the average rate of failure:
+ 
+```{r Expected value}
+# Expected number of failures is lambda
+expected_failures <- lambda
+
+expected_failures
+```
+ 
+* * *
+
+
+
+## 7- Uniform Distribution of Surgical Patient Waiting Time
+
+### Concepts and Definitions
+
+The waiting time for a surgical patient is assumed to be uniformly distributed across a continuous range. This assumption implies that within the specified interval, every moment is equally likely for the patient's surgery to begin.
+
+- **Uniform Distribution**: A distribution where all outcomes in a continuous range are equally likely.
+- **Parameters**: \(a = 0\) minutes (minimum waiting time), \(b = 30\) minutes (maximum waiting time).
+
+The probability density function (PDF) for a uniform distribution is defined as:
+
+\[f(x) = \frac{1}{b - a} \quad \text{for} \quad a \leq x \leq b\]
+
+### Questions to answer
+
+1. **Probability of Waiting More Than 10 Minutes**: This can be found by considering the proportion of the time interval from 10 to 30 minutes relative to the entire interval from 0 to 30 minutes.
+
+2. **Probability After Waiting 10 Minutes**: Given the patient has already waited 10 minutes, we reassess the waiting time distribution from 0 to 20 minutes and calculate the probability of waiting at least another 5 minutes.
+
+3. **Expected Waiting Time**: The average time a patient can expect to wait, given by the midpoint of the distribution's range.
+
+### Calculating the Probabilities and Expected Waiting Time
+
+#### Probability of Waiting More Than 10 Minutes
+
+To calculate the probability that a patient waits more than 10 minutes:
+
+```{r probability-more-than-10-minutes}
+a <- 0
+b <- 30
+# Proportion of the distribution above 10 minutes
+wait_more_than_10 <- (b - 10) / (b - a)
+
+wait_more_than_10
+```
+
+
+#### Probability of Waiting at Least Another 5 Minutes After 10 Minutes
+```{r Patient has already waited 10 min, prob they will wait at least another 5 min}
+# New range is 0 to 20 minutes after waiting 10 minutes
+remaining_time_after_10 <- b - 10
+# Proportion of the new range above 5 more minutes
+wait_at_least_5_more <- (remaining_time_after_10 - 5) / remaining_time_after_10
+
+wait_at_least_5_more
+```
+
+
+#### Expected Waiting Time
+
+```{r Expected wait time}
+# Midpoint of the distribution's range (in case of uniform distr.)
+expected_waiting_time <- (a + b) / 2
+
+expected_waiting_time
+```
+
+* * *
+
+
+
+## 8- Exponential Distribution of MRI Failure Time
+
+### Setting up the problem
+
+An old MRI machine's failure time follows an exponential distribution, with an expected lifetime of 10 years. This section calculates the expected failure time, standard deviation, and probabilities of failure at specific times.
+
+- **Rate Parameter (\(\lambda\))**: Given the expected lifetime (\(\mu = 10\) years), \(\lambda = \frac{1}{10}\).
+
+#### Calculating Expected Failure Time and Standard Deviation
+
+```{r expected-and-sd}
+lambda <- 1 / 10
+
+# Expected failure time
+expected_failure_time <- 1 / lambda
+
+# Standard deviation
+standard_deviation <- 1 / lambda
+
+list(expected_failure_time = expected_failure_time, standard_deviation = standard_deviation)
+```
+
+
+#### Probability of Failing After 8 Years
+```{r Prob-of-Failing-After-8-Years}
+years <- 8
+
+# Probability of surviving past 8 years
+prob_survive_past_8 <- exp(-lambda * years)
+
+# Probability of failing after 8 years is the complement
+prob_fail_after_8 <- 1 - prob_survive_past_8  #survival function of the exponential distribution
+
+prob_fail_after_8
+```
+
+
+#### Probability of Failing in the Next Two Years After Resisting 8 Years
+```{r Prob failing next 2 years}
+next_years <- 2
+
+# Probability of failing in the next two years is the same as failing within two years
+prob_fail_next_2 <- 1 - exp(-lambda * next_years)
+
+prob_fail_next_2
+```
+
+* * *
+
