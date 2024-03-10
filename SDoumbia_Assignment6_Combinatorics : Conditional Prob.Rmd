@@ -1,0 +1,301 @@
+---
+title: "Assignment 6: Combinatorics / Conditional Prob"
+author: "Souleymane Doumbia"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Question 1
+
+There are only two possibilities for the number of green jellybeans withdrawn to be less than 2: 0 green jellybeans or 1 green jellybean.
+
+1. First case: 
+     If 0 green jellybeans are withdrawn
+   - Number of green jellybeans withdrawn: 0
+   - Number of red jellybeans withdrawn: 5
+   - Number of ways to choose 5 red jellybeans from the 7 available: 
+   \[
+   \binom{7}{5} = \frac{7!}{5!(7-5)!} = \frac{7!}{5!2!} = \frac{7 \times 6}{2} = 21
+   \]
+
+2. Second case:
+     If 1 green jellybean is withdrawn
+   - Number of green jellybeans withdrawn: 1
+   - Number of red jellybeans withdrawn: 4
+   - Number of ways to choose 1 green jellybean from the 5 available and 4 red jellybeans from the 7 available:
+   \[
+   \binom{5}{1} \times \binom{7}{4} = \frac{5!}{1!(5-1)!} \times \frac{7!}{4!(7-4)!} = 5 \times 35 = 175
+   \]
+
+total number of ways from both cases:
+\[Total \ number \ of \ ways = 21 + 175 = 196\]
+
+So, there are 196 ways to withdraw 5 jellybeans from the bag such that the number of green ones withdrawn is less than 2.
+
+
+## Question 2
+
+we can consider two cases:
+
+1. Selecting 4 representatives and 1 senator.
+2. Selecting all 5 members as representatives.
+
+Let's calculate the number of ways for each case:
+
+1. Selecting 4 representatives and 1 senator:
+   - Number of ways to select 4 representatives from the 13 available: $\binom{13}{4}$
+   - Number of ways to select 1 senator from the 14 available: $\binom{14}{1}$
+
+2. Selecting all 5 members as representatives:
+   - Number of ways to select 5 representatives from the 13 available: $\binom{13}{5}$
+
+We add the number of ways from both cases:
+
+\[
+Total \ number \ of \ ways = \binom{13}{4} \times \binom{14}{1} + \binom{13}{5}
+\]
+
+
+\[
+\binom{13}{4} = \frac{13!}{4!(13-4)!} = \frac{13!}{4!9!} = \frac{13 \times 12 \times 11 \times 10}{4 \times 3 \times 2 \times 1} = 715
+\]
+
+\[
+\binom{14}{1} = \frac{14!}{1!(14-1)!} = \frac{14!}{1!13!} = 14
+\]
+
+\[
+\binom{13}{5} = \frac{13!}{5!(13-5)!} = \frac{13!}{5!8!} = \frac{13 \times 12 \times 11 \times 10 \times 9}{5 \times 4 \times 3 \times 2 \times 1} = 1287
+\]
+
+So,
+
+\[
+Total \ number \ of \ ways = 715 \times 14 + 1287 = 11297
+\]
+
+There are 11297 ways to form a subcommittee of 5 members if at least 4 of the members must be representatives.
+
+
+## Question 3
+We have three event; so to get the total outcome,
+we'll multiply the number of outcomes for each event.
+
+1. **Coin Tosses (5 times)**:
+   - Each coin toss has 2 possible outcomes (heads or tails).
+   - Total number of outcomes for 5 coin tosses: $2^5 = 32$.
+
+2. **Die Rolls (2 times)**:
+   - Each die roll has 6 possible outcomes (numbers 1 through 6).
+   - Total number of outcomes for 2 die rolls: $6^2 = 36$.
+
+3. **Drawing Cards (3 cards)**:
+   - The number of ways to draw 3 cards from a standard deck of 52 cards without replacement can be calculated using combinations.
+   - Number of ways to choose 3 cards from 52: $\binom{52}{3}$.
+
+Now, to find the total number of different outcomes, we multiply the number of outcomes for each event:
+
+\[ \text{Total number of outcomes} = \text{Number of outcomes for coin tosses} \times \text{Number of outcomes for die rolls} \times \text{Number of outcomes for drawing cards} \]
+
+\[ = 32 \times 36 \times \binom{52}{3} \]
+
+Let's calculate it:
+
+\[
+\binom{52}{3} = \frac{52!}{3!(52-3)!} = \frac{52!}{3!49!} = \frac{52 \times 51 \times 50}{3 \times 2 \times 1} = 22100
+\]
+
+So,
+
+\[ \text{Total number of outcomes} = 32 \times 36 \times 22100 = 25459200 \]
+
+Therefore, there are 25,459,200 different outcomes possible.
+
+
+## Question 4
+
+We can consider the complementary probability that none of the cards drawn is a 3 and subtract it from 1.
+
+Total number of ways to draw 3 cards from a standard deck of 52 cards: $\binom{52}{3}$.
+
+Number of ways to draw 3 cards without any 3s: Since there are 4 cards with the number 3 in the deck, and we need to choose 3 cards without any 3s, we choose from the remaining 48 cards: $\binom{48}{3}$.
+
+Now, to find the probability that at least one of the cards drawn is a 3:
+
+\[ P(\text{At least one 3}) = 1 - P(\text{No 3s}) \]
+
+\[ = 1 - \frac{\binom{48}{3}}{\binom{52}{3}} \]
+
+Let's calculate it:
+
+\[
+\binom{52}{3} = \frac{52!}{3!(52-3)!} = \frac{52!}{3!49!} = \frac{52 \times 51 \times 50}{3 \times 2 \times 1} = 22100
+\]
+
+\[
+\binom{48}{3} = \frac{48!}{3!(48-3)!} = \frac{48!}{3!45!} = \frac{48 \times 47 \times 46}{3 \times 2 \times 1} = 17296
+\]
+
+So,
+
+\[ P(\text{At least one 3}) = 1 - \frac{17296}{22100} \]
+
+\[ \approx 1 - 0.7832 \]
+
+\[ \approx 0.2168 \]
+
+Therefore, the probability that at least one of the cards drawn is a 3 is approximately 0.2168.
+
+
+## Question 5
+
+### Step 1: How many different combinations of 5 movies can Lorenzo rent?
+
+Total number of movies available (17 documentaries + 14 mysteries = 31 movies).
+
+So we have,
+
+\[ \text{Total combinations} = \binom{31}{5} \]
+
+Now, let's calculate this value.
+
+\[ \binom{31}{5} = \frac{31!}{5!(31-5)!} = \frac{31!}{5!26!} \]
+
+\[ = \frac{31 \times 30 \times 29 \times 28 \times 27}{5 \times 4 \times 3 \times 2 \times 1} \]
+
+\[ = 169911 \]
+
+So, there are 169,911 different combinations of 5 movies Lorenzo can rent.
+
+### Step 2: How many different combinations of 5 movies can Lorenzo rent if he wants at least one mystery?
+
+Total combinations without any mysteries:
+\[ \text{Combinations without any mysteries} = \binom{17}{5} = \frac{17!}{5!(17-5)!} = \frac{17!}{5!12!} = \frac{17 \times 16 \times 15 \times 14 \times 13}{5 \times 4 \times 3 \times 2 \times 1} \]
+
+\[ \binom{17}{5} = \frac{17 \times 16 \times 15 \times 14 \times 13}{5 \times 4 \times 3 \times 2 \times 1} = 6188 \]
+
+Now, we subtract this value from the total combinations calculated in Step 1 to get the number of combinations with at least one mystery.
+
+\[ \text{Combinations with at least one mystery} = 169911 - 6188 = 163723 \]
+
+So, there are 163,723 different combinations of 5 movies Lorenzo can rent if he wants at least one mystery.
+
+
+
+## Question 6
+
+To make up the schedule of 9 symphonies, Cory needs to choose 3 symphonies from each of the three composers:
+
+For Brahms: \( \binom{4}{3} = 4 \)
+
+For Haydn: \( \binom{104}{3} \)
+
+For Mendelssohn: \( \binom{17}{3} \)
+
+we multiply the number of ways for each composer to get the total possible number of ways:
+
+\[ \text{Total schedules} = 4 \times \binom{104}{3} \times \binom{17}{3} \]
+
+We have:
+
+\[ \binom{104}{3} = \frac{104!}{3!(104-3)!} = \frac{104!}{3!101!} = \frac{104 \times 103 \times 102}{3 \times 2 \times 1} \]
+
+\[ \binom{17}{3} = \frac{17!}{3!(17-3)!} = \frac{17!}{3!14!} = \frac{17 \times 16 \times 15}{3 \times 2 \times 1} \]
+
+The total number of schedules is:
+
+\[ \text{Total schedules} = 4 \times \frac{104 \times 103 \times 102}{3 \times 2 \times 1} \times \frac{17 \times 16 \times 15}{3 \times 2 \times 1} \]
+
+\[ = 4 \times \frac{104 \times 103 \times 102 \times 17 \times 16 \times 15}{3 \times 2 \times 1 \times 3 \times 2 \times 1} \]
+
+\[ = 4 \times \frac{104 \times 103 \times 102 \times 17 \times 16 \times 15}{3!} \]
+
+\[ = 4 \times \frac{17 \times 16 \times 15 \times 104 \times 103 \times 102}{3!} \]
+
+\[ = 4 \times \frac{4457905920}{6} \]
+
+\[ = 4 \times 689120 \]
+
+\[ = 2971937280 \]
+
+So, there are \( 2.97 \times 10^9 \) different schedules possible.
+
+
+
+## Question 8
+
+### Total number of arrangements (Any order)
+
+Considering the scenario where Zane can plant the 10 trees in any order, without any restrictions, the total number of arrangements is: \(10!\) ways.
+
+### Total number of Favorable Arrangements
+
+We are arranging two groups (group of 5 sycamores and group of 5 cypress trees) in a row, which can be done in \(2!\) ways because the two groups can either be in the order sycamore-cypress or cypress-sycamore.
+
+Within each group, the trees can be arranged amongst themselves. Therefore, the sycamores can be arranged in \(5!\) ways, and similarly, the cypress trees can also be arranged in \(5!\) ways.
+
+Then, the total number of ways to meet this particular condition is:
+
+$$2 \times 5! \times 5!$$
+
+### Probability Calculation of having the Favorable Arrangement in a random situation:
+
+$$P = \frac{2 \times 5! \times 5!}{10!}$$
+
+$$P \approx 0.0079$$
+
+Thus, the probability of Zane randomly planting the trees in the desired arrangement is approximately **0.0079**.
+
+
+
+
+## Question 9
+
+### Step 1: Expected Value (EV)
+
+- ***Favorable Outcomes (Queen or Lower)***: There are 44 such cards in a deck.
+
+- ***Unfavorable Outcomes (King or Ace)***: There are 8 such cards in the deck.
+
+***Probabilities:***
+
+- Probability of winning (\(P_{win}\)): Drawing a queen or lower, which is \(\frac{44}{52}\).
+
+- Probability of losing (\(P_{loss}\)): Drawing a king or an ace, which is \(\frac{8}{52}\).
+
+- Winning: Receiving $4 (\$4).
+
+- Losing: Paying $16 (\$-16).
+
+Thus, the expected value of the game is:
+
+\[EV = (P_{win} \times \$4) + (P_{loss} \times -\$16)\]
+
+\[EV = \left(\frac{44}{52} \times \$4\right) + \left(\frac{8}{52} \times -\$16\right)\]
+
+\[EV = \frac{44}{13} - \frac{32}{13} = \frac{12}{13}\]
+
+\[EV = \$\frac{12}{13}\]
+
+\[EV \approx \$0.9231\]
+
+### Step 2: Expected Total from 833 Games
+
+
+\[Total \, EV = EV \times 833\]
+
+\[Total \, EV = \$0.9231 \times 833\]
+
+\[Total \, EV \approx \$768.94\]
+
+
+
+* * *
+
+
+
+
