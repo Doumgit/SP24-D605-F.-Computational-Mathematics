@@ -1,0 +1,143 @@
+---
+title: "Assignment 7: Imp. Distributions / EX / VARX"
+author: "Souleymane Doumbia"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Problem 1
+
+## Distribution of Y, the Minimum of Xi's
+
+Given $n$ mutually independent random variables $X_1, X_2, \ldots, X_n$, each uniformly distributed over the integers from 1 to $k$, we aim to find the distribution of $Y = \min(X_1, X_2, \ldots, X_n)$.
+
+Each $X_i$ can take any integer value from 1 to $k$ with equal probability, meaning the probability of any specific value is $\frac{1}{k}$, given the discrete nature of the values between 1 and k.
+
+#### Probability Calculations
+
+1. **Probability of $X_i > y$**: For a single variable $X_i$, the probability it is greater than a value $y$ (where $1 \leq y < k$) is given by $\frac{k - y}{k}$ (since the number of outcomes greater than $y$ is $k−y$). If $y = k$, then $P(X_i > y) = 0$ since there are no integers greater than $k$ in the specified range.
+
+2. **Probability of All $X_i > y$**: Given the independence of the $X_i$, the probability that all variables are greater than $y$ is $(\frac{k - y}{k})^n$.
+
+3. **Distribution of $Y$**:
+
+   - **Probability that $Y > y$**: $(\frac{k - y}{k})^n$, indicating all $X_i$'s are greater than $y$.
+   
+   - **Probability that $Y \leq y$**: The complement, which is $1 - (\frac{k - y}{k})^n$.
+
+4. **Probability that $Y = y$**:   
+To find the probability of $Y$ being exactly $y$, we use the fact that $P(Y \leq y)$ includes the probability of $Y$ being less than $y$ and being exactly $y$. Similarly, $P(Y \leq y-1)$ includes the probability of $Y$ being less than $y$ but not $y$ itself. Therefore, the difference between these two probabilities, $P(Y \leq y) - P(Y \leq y-1)$, effectively isolates the probability of $Y$ being exactly $y$.
+
+\[P(Y=y) = P(Y \leq y) - P(Y \leq y-1)\]
+
+
+\[P(Y = y) = \left(1 - \left(\frac{k - y}{k}\right)^n\right) - \left(1 - \left(\frac{k - (y-1)}{k}\right)^n\right)\]
+
+Thus,
+
+\[P(Y = y) = \left(\frac{k - (y-1)}{k}\right)^n - \left(\frac{k - y}{k}\right)^n\]
+
+
+
+
+# Problem 2
+
+## a. Geometric Distribution
+
+Given that a failure is expected once every ten years, the success probability per year is $p = \frac{1}{10}$. 
+
+The probability of the machine failing after 8 years can be seen as the complement of it not failing in the first 8 years, calculated as $1 - (1 - p)^8$. 
+
+The expected value for a geometric distribution is $\frac{1}{p}$, and the standard deviation is $\sqrt{\frac{1 - p}{p^2}}$.
+
+```{r Geometric_Distribution}
+p <- 1/10
+# Probability of failing after 8 years
+prob_fail_after_8_geom <- 1 - (1 - p)^8
+
+# Expected value and standard deviation
+mean_geom <- 1 / p
+sd_geom <- sqrt((1 - p) / p^2)
+
+prob_fail_after_8_geom
+mean_geom
+sd_geom
+```
+
+
+
+## b. Exponential Distribution
+
+For the exponential distribution, which is typically used to model the time until the first event in a Poisson process, the rate $\lambda$ is given by the inverse of the expected lifetime, $\lambda = \frac{1}{10}$. 
+
+Thus, the probability of failure after 8 years is $1 - F(8) = e^{-\lambda \times 8}$, with $F(x)$ being the cumulative distribution function of the exponential distribution. 
+
+Both the expected value and the standard deviation for an exponential distribution are $\frac{1}{\lambda}$.
+
+```{r Exponential_Distribution}
+lambda <- 1/10
+# Probability of failing after 8 years
+prob_fail_after_8_exp <- 1 - pexp(8, rate = lambda)
+
+# Expected value and standard deviation
+mean_exp <- 1 / lambda
+sd_exp <- 1 / lambda
+
+prob_fail_after_8_exp
+mean_exp
+sd_exp
+```
+
+
+
+## c. Binomial Distribution
+
+Modeling the problem as a binomial distribution, where each year is a trial with a failure probability $p = \frac{1}{10}$, we seek the probability of observing failures after 8 years. This is given by 1 - $(1 - p)^8$ (Complement of the probability of observing 0 failures in 8 years). 
+
+For a binomial distribution, the expected value is $n \cdot p$ and the standard deviation is $\sqrt{n \cdot p \cdot (1-p)}$, where $n = 8$ is the number of years.
+
+```{r Binomial_Distribution}
+n <- 8
+p <- 1/10
+
+# Probability of 0 failures in 8 years
+prob_0_failures_8_years <- dbinom(0, size = n, prob = p)
+
+# Probability of failures after 8 years
+prob_fail_after_8_binom <- 1 - prob_0_failures_8_years
+
+# Expected value and standard deviation
+mean_binom <- n * p
+sd_binom <- sqrt(n * p * (1 - p))
+
+prob_fail_after_8_binom
+mean_binom
+sd_binom
+```
+
+
+## d. Poisson Distribution
+
+The Poisson distribution is applied here with an average rate of $\lambda = 0.8$ failures in 8 years, considering the machine's expected one failure every ten years. 
+
+The probability of observing the first failure after 8 years is modeled by the probability of observing 0 events in 8 years. 
+
+The mean and the standard deviation of a Poisson distribution are equal to $\lambda$.
+
+```{r Poisson_Distribution}
+lambda_8 <- 0.8
+# Probability of failing after 8 years
+prob_fail_after_8_pois <- dpois(0, lambda = lambda_8)
+
+# Expected value and standard deviation
+mean_pois <- lambda_8
+sd_pois <- sqrt(lambda_8)
+
+prob_fail_after_8_pois
+mean_pois
+sd_pois
+```
