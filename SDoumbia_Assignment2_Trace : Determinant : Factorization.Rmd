@@ -1,0 +1,140 @@
+---
+title: 'Assignment 2: Trace / Determinant / Factorization'
+author: "Souleymane Doumbia"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(Matrix)
+```
+
+###  1.  Problem set 1
+
+#### (1) Showing $A^TA \neq AA^T$ in General
+
+Given $A$ as an $m \times n$ matrix, $A^T$ is an $n \times m$ matrix. 
+
+The product $A^TA$ results in an $n \times n$ matrix, while $AA^T$ results in an $m \times m$ matrix.
+
+##### Proof Using an Example:
+
+Let's take a matrix $A$:
+
+$$
+A = \begin{pmatrix}
+1 & 2 \\
+3 & 4 \\
+\end{pmatrix}
+$$
+
+The transpose, $A^T$, is:
+
+$$
+A^T = \begin{pmatrix}
+1 & 3 \\
+2 & 4 \\
+\end{pmatrix}
+$$
+
+Calculating $A^TA$:
+
+$$
+A^TA = \begin{pmatrix}
+1 & 3 \\
+2 & 4 \\
+\end{pmatrix}
+\begin{pmatrix}
+1 & 2 \\
+3 & 4 \\
+\end{pmatrix}
+= \begin{pmatrix}
+10 & 14 \\
+14 & 20 \\
+\end{pmatrix}
+$$
+
+Calculating $AA^T$:
+
+$$
+AA^T = \begin{pmatrix}
+1 & 2 \\
+3 & 4 \\
+\end{pmatrix}
+\begin{pmatrix}
+1 & 3 \\
+2 & 4 \\
+\end{pmatrix}
+= \begin{pmatrix}
+5 & 11 \\
+11 & 25 \\
+\end{pmatrix}
+$$
+
+Thus, $A^TA \neq AA^T$, demonstrating that in general, $A^TA \neq AA^T$.
+
+
+#### (2) Conditions for $A^TA = AA^T$
+
+For the equality $A^TA = AA^T$ to hold, the matrix $A$ must satisfy certain conditions. This is true for:
+
+- **Symmetric Matrices**: Where $A = A^T$. For such matrices, it's common that $A^TA = AA^T$ due to their symmetry.
+- **Orthogonal Matrices**: Which satisfy $A^TA = I$, where $I$ is the identity matrix. Since $A^T = A^{-1}$ for orthogonal matrices, both $A^TA$ and $AA^T$ yield the identity matrix, indicating that $A^TA = AA^T$ in this case.
+
+
+
+
+
+###  2.  Problem set 2
+
+**Here is R function for LU decomposition of a square matrix**
+```{r luDecomposition_function_square_matrix}
+
+luDecomposition <- function(A) {
+  if (!is.matrix(A)) {
+    stop("Input must be a matrix.")
+  }
+  
+  n <- nrow(A)
+  if (ncol(A) != n) {
+    stop("Matrix must be square.")
+  }
+  
+  L <- diag(1, n) # Initializing L as an identity matrix of size n
+  U <- A # Copying A into U for transformation
+  
+  for (j in 1:(n-1)) {
+    for (i in (j+1):n) {
+      if (U[j, j] == 0) {
+        stop("Zero pivot encountered.")
+      }
+      L[i, j] <- U[i, j] / U[j, j]
+      U[i, ] <- U[i, ] - L[i, j] * U[j, ]
+    }
+  }
+  
+  return(list(L = L, U = U))
+}
+
+```
+
+**An example of Application using the LU function above:**
+```{r Application_of_luDecomposition_function}
+
+A <- matrix(c(1, 2, 1, 3,
+              3, 8, 1, 5,
+              0, 4, 1, 9,
+              4, 11, 3, 0), byrow = TRUE, nrow = 4)
+
+result <- luDecomposition(A)
+
+print("L Matrix:")
+print(result$L)
+
+print("U Matrix:")
+print(result$U)
+```
+
+* * *
