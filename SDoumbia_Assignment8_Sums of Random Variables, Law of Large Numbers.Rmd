@@ -1,0 +1,99 @@
+---
+title: "Assignment 8: Sums of Random Variables, Law of Large Numbers"
+author: "Souleymane Doumbia"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Problem 11, Page 303
+
+- Each of the 100 lightbulbs has an exponential lifetime with a mean of 1000 hours ($\mu = 1000$), implying a rate $\lambda = \frac{1}{1000} = 0.001$ hour$^{-1}$.
+
+- We are interested in finding the expected time until the first lightbulb fails, which involves dealing with the minimum of a set of exponential random variables as in Exercise 10.
+
+#### Exercise 10 Approach 
+
+The key property of exponential distributions in this context is that if you have $n$ independent exponential random variables $X_1, X_2, \ldots, X_n$ with the same rate $\lambda$, the minimum of these variables, $M = \min(X_1, X_2, \ldots, X_n)$, is also exponentially distributed, but with rate $n\lambda$.
+
+The expected value (mean) of an exponential distribution with rate $\lambda$ is $\frac{1}{\lambda}$. Therefore, for the minimum $M$ of $n$ such random variables, its expected value would be:
+
+\[ E(M) = \frac{1}{n\lambda} \]
+
+#### Solving the problem
+
+Substituting the given values into the formula:
+
+- $n = 100$ lightbulbs
+- $\lambda = 0.001$ (the rate parameter for each lightbulb's lifetime)
+
+\[ E(M) = \frac{1}{100 \times 0.001} = \frac{1}{0.1} = 10 \text{ hours} \]
+
+
+
+## Problem 14, Page 303
+
+To show that $Z = X_1 - X_2$ has the density $f_Z(z) = \frac{1}{2}\lambda e^{-\lambda|z|}$ when $X_1$ and $X_2$ are independent exponential random variables with the same parameter $\lambda$, let's include some integration steps.
+
+#### Step 1: Exponential distribution
+
+Given $X_1, X_2 \sim \text{Exponential}(\lambda)$, their PDFs are $f_{X_1}(x) = \lambda e^{-\lambda x}$ and $f_{X_2}(x) = \lambda e^{-\lambda x}$, for $x \geq 0$.
+
+#### Step 2: Density Function of $Z = X_1 - X_2$
+
+Since $X_1$ and $X_2$ are independent random variables, we use the formula for the convolution of their density functions:
+
+$$
+f_Z(z) = \int_{-\infty}^{\infty} f_{X_1}(x) f_{X_2}(x - z) \, dx
+$$
+
+Given the exponential distribution's support is only for $x \geq 0$, we adjust our limits accordingly and consider the absolute value of $z$ to account for the symmetry of the situation (since $X_1 - X_2$ could be negative).
+
+#### Case1: $z \geq 0$
+
+For $z \geq 0$, $X_1$ must be greater than $X_2$ by at least $z$. Considering the transformation and the range of integration where both densities contribute ($x \geq z$ for $X_1$ and $x-z$ for $X_2$):
+
+$$
+f_Z(z) = \lambda^2 \int_{z}^{\infty} e^{-\lambda x} e^{-\lambda (x-z)} \, dx
+$$
+$$
+= \lambda^2 e^{\lambda z} \int_{z}^{\infty} e^{-2\lambda x} \, dx
+$$
+$$
+= \lambda^2 e^{\lambda z} \left[ -\frac{1}{2\lambda} e^{-2\lambda x} \right]_{z}^{\infty}
+$$
+$$
+= \frac{1}{2}\lambda e^{-\lambda z}
+$$
+
+#### Case2: $z < 0$
+
+For $z < 0$, the situation is symmetric, but $X_2$ is greater than $X_1$. The absolute value of $z$ accounts for this symmetry. Thus, integrating from $0$ to infinity, considering $x$ for $X_1$ and $x+|z|$ (or equivalently $x-z$ for negative $z$) for $X_2$:
+
+$$
+f_Z(z) = \lambda^2 \int_{0}^{\infty} e^{-\lambda x} e^{-\lambda (x-|z|)} \, dx
+$$
+$$
+= \lambda^2 e^{\lambda |z|} \int_{0}^{\infty} e^{-2\lambda x} \, dx
+$$
+$$
+= \lambda^2 e^{\lambda |z|} \left[ -\frac{1}{2\lambda} e^{-2\lambda x} \right]_{0}^{\infty}
+$$
+$$
+= \frac{1}{2}\lambda e^{-\lambda |z|}
+$$
+
+
+
+Both cases, $z \geq 0$ and $z < 0$, yield the same result after integration: Then,
+
+$$
+f_Z(z) = \frac{1}{2}\lambda e^{-\lambda |z|}
+$$
+
+
+
+
