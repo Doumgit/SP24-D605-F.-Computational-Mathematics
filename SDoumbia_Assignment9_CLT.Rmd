@@ -1,0 +1,154 @@
+---
+title: "SDoumbia_Assignment09_CLT & Generating Functions"
+author: "Souleymane Doumbia"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# 1. Exercise 11, page 363
+
+We have been given:
+```{r seting up}
+
+mu <- 0                
+sigma <- sqrt(1/4)    
+Y1 <- 100             
+days <- 365          
+```
+
+
+According to the Central Limit Theorem (CLT), the sum of a large number of independent, identically distributed random variables, each with finite mean and variance, will approximate a normal distribution. 
+
+For the stock price \(Y_{365}\), we consider the sum of daily changes \(X_n\) over 364 days since 
+
+\[
+Y_{365} = Y_1 + \sum_{n=1}^{364} X_n
+\]
+
+where:
+- \(Y_{365}\) is the stock price on the 365th day,
+- \(Y_1\) is the initial stock price,
+- \(X_n\) represents the change in stock price on day \(n\),
+- The sum \(\sum_{n=1}^{364} X_n\) accumulates the daily changes across the year.
+
+Then, Using the cumulative distribution function of the normal distribution: We get
+```{r Calculating Probabilities}
+# Total mean and standard deviation after 364 days
+total_mean <- Y1 + mu * days
+total_sd <- sigma * sqrt(days - 1)
+
+# (a) P(Y365 >= 100)
+P_Y365_100 <- round((1 - pnorm(100, mean = total_mean, sd = total_sd)),3)
+
+# (b) P(Y365 >= 110)
+P_Y365_110 <- round(1 - pnorm(110, mean = total_mean, sd = total_sd),3)
+
+# (c) P(Y365 >= 120)
+P_Y365_120 <- round(1 - pnorm(120, mean = total_mean, sd = total_sd),3)
+
+# Print the probabilities
+cat("Probability of Y365 being geater than or equal to 100:", P_Y365_100, "\n")
+cat("Probability of Y365 being at least 110:", P_Y365_110, "\n")
+cat("Probability of Y365 being at least 120:", P_Y365_120, "\n")
+```
+
+
+
+# 2. Calculate the expected value and variance of the binomial distribution using the moment generating function.
+
+Calculate the expected value and variance of a binomial distribution using the moment generating function (MGF). The binomial distribution with parameters \(n\) (number of trials) and \(p\) (probability of success in each trial) has the moment generating function:
+
+\[
+M(t) = (1 - p + pe^t)^n
+\]
+
+where \(M(t)\) is the MGF, and \(t\) is the parameter of the MGF.
+
+## Calculation of Expected Value and Variance
+
+The expected value (\(E(X)\)) and variance (\(Var(X)\)) of a binomial distribution can be derived from the first and second derivatives of the MGF:
+
+- Expected value: \(E(X) = M'(0)\)
+- Variance: \(Var(X) = M''(0) - [M'(0)]^2\)
+
+### Implementation using n = 10 and p = 0.5
+
+First, we define the MGF of a binomial distribution and then calculate its first and second derivatives evaluated at \(t = 0\).
+
+```{r An example}
+
+n <- 10  # Number of trials
+p <- 0.5  # Probability of success
+
+# Moment generating function of binomial distribution
+MGF <- function(t) {
+  (1 - p + p * exp(t))^n
+}
+
+# First derivative of MGF at t = 0 (expected value)
+MGF_first_derivative <- D(expression((1 - p + p * exp(t))^n), "t")
+expected_value <- eval(MGF_first_derivative, list(t = 0, p = p, n = n))
+
+# Second derivative of MGF at t = 0
+MGF_second_derivative <- D(MGF_first_derivative, "t")
+second_derivative_at_0 <- eval(MGF_second_derivative, list(t = 0, p = p, n = n))
+
+# Variance calculation
+variance <- second_derivative_at_0 - (expected_value^2)
+
+cat("Expected Value: ", expected_value, "\n")
+cat("Variance: ", variance, "\n")
+
+```
+
+
+
+# 3. Calculate the expected value and variance of the exponential distribution using the moment generating function.
+
+This document explains how to derive the expected value and variance of an exponential distribution using the moment generating function (MGF). The exponential distribution with rate parameter \(\lambda\) has the MGF:
+
+\[
+M(t) = \frac{\lambda}{\lambda - t}, \text{ for } t < \lambda
+\]
+
+## Calculation of Expected Value and Variance
+
+For an exponential distribution, the expected value (\(E(X)\)) and variance (\(Var(X)\)) can be determined from the first and second derivatives of its MGF:
+
+- Expected value: \(E(X) = M'(0)\)
+- Variance: \(Var(X) = M''(0) - [M'(0)]^2\)
+
+### Implementation using lambda = 1
+
+Below, we implement the MGF of an exponential distribution (with $\lambda = 1$), calculate its first and second derivatives, and evaluate these at \(t = 0\) to find the expected value and variance.
+
+```{r an example}
+lambda <- 1  # Rate parameter of the exponential distribution
+
+# Moment generating function for the exponential distribution
+MGF <- function(t) {
+  lambda / (lambda - t)
+}
+
+# Calculating the first derivative of the MGF
+MGF_first_derivative <- D(expression(lambda / (lambda - t)), "t")
+expected_value <- eval(MGF_first_derivative, list(t = 0, lambda = lambda))
+
+# Calculating the second derivative of the MGF
+MGF_second_derivative <- D(MGF_first_derivative, "t")
+second_derivative_at_0 <- eval(MGF_second_derivative, list(t = 0, lambda = lambda))
+
+# Calculating the variance
+variance <- second_derivative_at_0 - (expected_value^2)
+
+cat("Expected Value: ", expected_value, "\n")
+cat("Variance: ", variance, "\n")
+```
+
+
+
+
