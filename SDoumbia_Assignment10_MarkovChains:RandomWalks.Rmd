@@ -1,0 +1,112 @@
+---
+title: "SDoumbia_Assignment10_MarkovChains/RandomWalks"
+author: "Souleymane Doumbia"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Smith is in jail and has 1 dollar; he can get out on bail if he has 8 dollars.
+A guard agrees to make a series of bets with him. If Smith bets A dollars,
+he wins A dollars with probability .4 and loses A dollars with probability .6.
+Find the probability that he wins 8 dollars before losing all of his money if
+(a) he bets 1 dollar each time (timid strategy).
+(b) he bets, each time, as much as possible but not more than necessary to
+bring his fortune up to 8 dollars (bold strategy).
+(c) Which strategy gives Smith the better chance of getting out of jail?
+
+Given:
+
+- Smith starts with 1 dollar.
+
+- He needs 8 dollars to get out of jail.
+
+- Each bet can result in winning or losing the bet amount.
+
+- The probability of winning a bet is 0.4, and the probability of losing is 0.6.
+
+
+## Part (a): Timid Strategy
+
+Under the timid strategy, the recursive formula for the probability \(P(n)\) when betting 1 dollar each time is:
+
+\[P(n) = 0.4P(n+1) + 0.6P(n-1)\]
+
+with \(1 \leq n \leq 7\), and the boundary conditions \(P(8) = 1\) and \(P(0) = 0\).
+
+```{r Timid_Strategy}
+p_win <- 0.4
+n_states <- 9
+
+# Initializing probability vector with zeros
+P <- numeric(n_states)
+
+P[9] <- 1 
+
+# Calculating probabilities for the timid strategy
+for (i in (n_states-1):1) {
+  if (i == 1) {  
+    P[i] <- 0
+  } else {
+    P[i] <- p_win * P[i + 1] + (1 - p_win) * P[i - 1]
+  }
+}
+
+# Probability of reaching $8 starting from $1
+P_timid <- P[2]
+P_timid
+
+```
+After calculating, we find that the probability of reaching $8 starting from $1 under the timid strategy is approximately 0.164%.
+
+## Part (b): Bold Strategy
+
+For the bold strategy, Smith bets as much money as he can without exceeding the amount he needs to reach 8 dollars. The amount bet is \(min(n, 8-n)\) where \(n\) is the current amount of money Smith has. The recursive formula adjusts for these variable bet sizes:
+
+\[P(n) = 0.4P(n + min(n, 8-n)) + 0.6P(n - min(n, 8-n))\]
+
+With the same boundary conditions as the timid strategy (\(P(8) = 1\) and \(P(0) = 0\)), we solve for \(P(n)\) for each state from \(n = 7\) down to \(n = 1\) considering the bold strategy of betting.
+
+```{r Bold_Strategy}
+p_win <- 0.4
+n_states <- 9
+
+P_bold <- numeric(n_states)
+
+P_bold[9] <- 1 # Winning condition
+
+# Iterating through each state to calculate probabilities
+for (i in 8:1) {
+  if (i < 5) {
+    # If Smith has less than $5, bet all his money
+    # Since he can't lose more than he bets, we only consider the winning scenario.
+    P_bold[i] <- p_win * P_bold[i*2]
+  } else {
+    # If Smith has $5 or more, bet only what's needed to reach $8
+    P_bold[i] <- p_win * P_bold[9] + (1 - p_win) * P_bold[i - (8 - i)]
+  }
+}
+
+# Probability of reaching $8 starting from $1 under the bold strategy
+P_bold_1 <- P_bold[2]
+P_bold_1
+
+```
+Applying this strategy, the probability of Smith winning 8 dollars before going broke is found to be approximately 6.4%.
+
+
+## Part (c): Comparison
+
+- **Timid Strategy Probability:** 0.164%
+- **Bold Strategy Probability:** 6.4%
+
+Thus, the **bold strategy** significantly increases Smith's chances of achieving his goal of accumulating 8 dollars and securing his release from jail.
+
+
+
+* * *
+
+
