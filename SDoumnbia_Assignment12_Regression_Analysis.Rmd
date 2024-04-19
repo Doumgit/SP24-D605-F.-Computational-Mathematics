@@ -1,0 +1,228 @@
+---
+title: "SDoumbia W12 Regression Analysis"
+author: "Souleymane Doumbia"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Packages
+```{r}
+library(readr)
+library(ggplot2)
+```
+
+## Loading Dataset
+
+```{r loading_the_data}
+dataset = read_csv('https://raw.githubusercontent.com/Doumgit/SP24-D605-F.-Computational-Mathematics/main/Dataset.csv')
+head(dataset)
+```
+
+## Question 1:
+
+Provide a scatterplot of LifeExp~TotExp, and run simple linear regression. Do not transform the variables. Provide and interpret the F statistics, R^2, standard error,and p-values only. Discuss whether the assumptions of simple linear regression met.
+
+
+### Scatterplot of LifeExp~TotExp
+
+```{r scatterplot_of_LifeExp~TotExp} 
+
+plot(dataset$TotExp, dataset$LifeExp, main="Scatterplot of Life Expectancy vs Total Expenditure", xlab="Total Expenditure", ylab="Life Expectancy", pch=19, cex = .4)
+
+```
+
+### Simple Linear Regression
+```{r simple_linear_regression}
+simple_model <- lm(LifeExp ~ TotExp, data = dataset)
+
+summary(simple_model)
+```
+
+### Interpretation of  the F statistics, R^2, standard error,and p-values
+
+- ***F-statistic:*** \(65.26\), testing the null hypothesis that all regression coefficients are zero. The p-value is \(7.714 \times 10^{-14}\), indicating strong evidence against the null hypothesis, confirming the model's significance.
+
+- ***R-squared (R²):*** \(0.2577\), showing that 25.77% of the variability in Life Expectancy is explained by Total Expenditure, suggesting moderate model fit.
+
+- ***Adjusted R-squared:*** \(0.2537\), adjusting for the number of predictors, shows a reasonable explanation of variability, indicating moderate predictive power.
+
+- ***Standard Error:*** The Residual Standard Error is \(9.371\) on \(188\) degrees of freedom, reflecting the average deviation of observations from the fitted line. From other perspective, on average, the actual values of Life Expectancy are about 9.371 units away from the model's predictions.
+
+- ***P-values:*** The intercept's p-value is < \(2 \times 10^{-16}\), and for Total Expenditure, it is \(7.71 \times 10^{-14}\), both indicating strong statistical significance.
+
+
+### Is the assumptions of simple linear regression met?
+```{r residual analysis}
+par(mfrow=c(2,2))
+plot(simple_model)
+```
+
+***While the model appears to have a statistically significant relationship between Total Expenditure and Life Expectancy, several issues suggest that the model may not be the best fit for the data:***
+
+- The relationship between the predictor and the outcome may be nonlinear.
+
+- The assumption of homoscedasticity appears to be violated, as indicated by the widening spread of residuals in both the scatter plot and the scale-location plot.
+
+- The normality of residuals is questionable, with potential outliers or extreme values as shown in the Q-Q plot.
+
+- The influence of high-leverage points seems minimal, although it's something to be mindful of in further analyses.
+
+
+
+## Question 2:
+
+Raise life expectancy to the 4.6 power (i.e., LifeExp^4.6). Raise total expenditures to the 0.06
+power (nearly a log transform, TotExp^.06). Plot LifeExp^4.6 as a function of TotExp^.06, and r
+re-run the simple regression model using the transformed variables. Provide and interpret the F
+statistics, R^2, standard error, and p-values. Which model is "better?"
+
+### Building the transformed model
+```{r transformed_model}
+# Building transformed model
+dataset$LifeExp_4.6 <- dataset$LifeExp^4.6
+dataset$TotExp_0.06 <- dataset$TotExp^0.06
+
+plot(dataset$TotExp_0.06, dataset$LifeExp_4.6, main="Transformed Life Expectancy vs Total Expenditure", xlab="Total Expenditure (Transformed)", ylab="Life Expectancy (Transformed)", pch=19, cex = .4)
+
+transformed_model <- lm(LifeExp_4.6 ~ TotExp_0.06, data=dataset)
+
+summary(transformed_model)
+
+# Residual Analysis for transformed model
+par(mfrow=c(2,2))
+plot(transformed_model)
+```
+
+### Interpreting the F-statistics, R^2, standard error, and p-values. 
+- ***F-statistic:*** The F-statistic is 507.7 with a p-value less than 2.2e-16, indicating the model is statistically significant. This means the transformed Total Expenditure is a good predictor of Life Expectancy in the transformed scale.
+
+- ***R-squared (R²):** An R-squared value of 0.7298 suggests that approximately 72.98% of the variability in the transformed Life Expectancy is explained by the transformed Total Expenditure. This is quite high and shows the model has a strong explanatory power after the transformation.
+
+- ***Adjusted R-squared:*** Very close to the R-squared value at 0.7283, indicating that the inclusion of the predictor is indeed valuable and the model isn't being overfitted with unnecessary predictors.
+
+- ***Residual Standard Error:*** The residual standard error is large due to the scale of the transformed Life Expectancy, but it's important to compare this to the range and variance of the transformed Life Expectancy to fully assess its significance.
+
+- ***P-values:*** The p-values for the coefficients are extremely small (less than 2.2e-16), which means that both the slope and intercept are significantly different from zero, reaffirming the strong relationship between the predictor and the response.
+
+- ***Residual Diagnostics:***
+
+   ***Residuals vs Fitted Plot:*** No clear patterns suggest the presence of linearity between the transformed predictor and response, although there's a slight curve that may indicate some minor non-linearity remaining in the relationship.
+
+   ***Q-Q Plot:*** The plot shows some deviation from normality, especially in the tails, indicating that the residuals are not perfectly normally distributed. However, the central part of the distribution closely follows the expected line, showing improvement in normality compared to the untransformed model.
+
+   ***Scale-Location Plot:*** The spread of residuals is more consistent across the range of fitted values than in the untransformed model, suggesting an improvement in homoscedasticity. There's still a subtle pattern, but it's less pronounced than before.
+
+   ***Residuals vs Leverage Plot:*** No data points have a Cook's distance that indicates they are unduly influencing the model. This means there are no worrisome outliers that would overly influence the regression line.
+
+
+
+
+### Which model is "better?" simple_model or transformed_model?
+
+The transformed model shows a strong and significant relationship between Total Expenditure and Life Expectancy after applying the power transformations. The improvement in R-squared after transformation suggests that the power transformations helped to linearize the relationship and stabilize the variance of the residuals, meeting key assumptions of the linear regression model more closely. The residual diagnostics generally support the adequacy of the model but highlight the need for careful consideration of potential non-linearity and non-normality in residuals.
+
+## Question 3:
+
+Using the results from 2, forecast life expectancy when TotExp^.06 =1.5. Then forecast life
+expectancy when TotExp^.06=2.5.
+
+```{r forsting_with_transformed_model}
+
+# Function for back-transforming life expectancy
+back_transform_lifeExp <- function(transformed_lifeExp4.6) {
+  return(transformed_lifeExp4.6^(1/4.6))
+}
+
+# Extracting transformed_model coefficients
+b0 <- coef(transformed_model)[1]
+b1 <- coef(transformed_model)[2]
+
+# Defining TotExp values for prediction (TotExp^.06 = 1.5, and TotExp^.06 = 2.5)
+TotExp_transformed <- c(1.5, 2.5)
+
+# forcasting transformed life expectancy
+forcast_lifeExp_transformed <- b0 + b1 * TotExp_transformed
+
+# Back-transform (forcasting life expectancy)
+forcast_life_Exp <- back_transform_lifeExp(forcast_lifeExp_transformed)
+
+cat("Forecasted life expectancy when TotExp^.06 = 1.5:", forcast_life_Exp[1], "\n")
+cat("Forecasted life expectancy when TotExp^.06 = 2.5:", forcast_life_Exp[2], "\n")
+```
+
+
+## Question 4:
+
+Build the following multiple regression model and interpret the F Statistics, R^2, standard error,
+and p-values. How good is the model?
+
+LifeExp = b0+b1 x PropMd + b2 x TotExp +b3 x PropMD x TotExp
+
+```{r building_multiple_regression_model}
+# Fitting the multiple regression model including the interaction term
+multiple_model <- lm(LifeExp ~ PropMD + TotExp + PropMD*TotExp, data=dataset)
+
+summary(multiple_model)
+```
+
+
+- ***F-statistic:*** The F-statistic is 34.49 with a p-value of less than 2.2e-16, which indicates the model is statistically significant. This means that we have sufficient evidence to conclude that the model provides a better fit to the data.
+
+- ***R-squared (R²):*** The R-squared value is 0.3574, meaning that approximately 35.74% of the variability in Life Expectancy is explained by the model. This is a moderate R-squared value and suggests that while the model explains some of the variability in the response variable, there are still other factors not included in the model that account for the remaining variability.
+
+- ***Adjusted R-squared:*** At 0.3471, it is slightly lower than the R-squared value, which is expected as it adjusts for the number of predictors in the model. 
+
+- ***Residual Standard Error:*** The residual standard error is 8.765 on 186 degrees of freedom. This is the estimate of the standard deviation of the error term, and it represents the average distance that the observed values fall from the regression line. It's slightly high, which indicates that there is still substantial variability in the response variable that is not explained by the model.
+
+- ***P-values for Coefficients:***
+
+  ***Intercept:*** The p-value for the intercept is less than 2e-16, indicating that it is significantly different from zero.
+ 
+  ***PropMD:*** The p-value for PropMD is 2.32e-07, which is also highly significant.
+ 
+  ***TotExp:*** The p-value for TotExp is 9.39e-14, indicating a significant relationship with Life Expectancy.
+
+  ***PropMD:TotExp:*** The interaction term has a p-value of 6.35e-05, suggesting that the interaction between ***PropMD*** and and ***TotExp*** is statistically significant and that the effect of one predictor on the response variable Life Expectancy depends on the value of the other predictor. 
+  
+
+### How good is the multiple regression model?
+
+The model is statistically significant, and all predictors, including the interaction term, are significant. However, the R-squared value suggests that there's still much unexplained variability. This means while the model does explain a portion of the variation in Life Expectancy, there may be other variables and factors that could improve the model if included.
+
+
+## Question 5:
+
+Forecast LifeExp when PropMD=.03 and TotExp = 14. Does this forecast seem realistic? Why
+or why not?
+
+```{r forcasting_with_multiple_linear_regression_model}
+# Extracting coefficients from the multiple regression model
+intercept <- coef(multiple_model)[1]
+coeff_propMd <- coef(multiple_model)[2]
+coeff_totExp <- coef(multiple_model)[3]
+coeff_interaction <- coef(multiple_model)[4]
+
+# Values for PropMD and TotExp for the prediction
+PropMd_value <- 0.03
+TotExp_value <- 14
+
+# Calculating the forecasted LifeExp
+LifeExp_forecast <- intercept +
+                    coeff_propMd * PropMd_value +
+                    coeff_totExp * TotExp_value +
+                    coeff_interaction * (PropMd_value * TotExp_value)
+
+cat("Forecasted Life Expectancy when PropMD = 0.03 and TotExp = 14:", LifeExp_forecast, "\n")
+```
+
+
+### Does this forecast seem realistic? Why or why not?
+
+The prediction of 107.696 for human life expectancy is likely not realistic because it far exceeds current known limits of human lifespan.
+
+* * *
+
