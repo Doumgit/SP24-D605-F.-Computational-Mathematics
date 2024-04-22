@@ -1,0 +1,71 @@
+---
+title: "SDoumbia_Week13_Discussion"
+author: "Souleymane Doumbia"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### Packages
+
+```{r loading_packages}
+library(ggplot2)
+library(pracma)
+```
+
+## Problem Statement
+
+We want to calculate the total area enclosed by the following functions:
+
+$$f(x) = 2x^2 + 5x - 3$$
+
+$$g(x) = x^2 + 4x - 1$$
+
+
+### Functions Definition
+```{r function_f_and_g}
+f <- function(x) { 2 * x^2 + 5 * x - 3 }
+g <- function(x) { x^2 + 4 * x - 1 }
+```
+
+
+### Intersection Points
+To find the areas enclosed by the curves, we first need to determine where they intersect.
+
+```{r Finding_Intersection_Points}
+intersection <- function(x) {
+  f(x) - g(x)
+}
+
+# Using a numerical method to find roots
+x1 <- uniroot(intersection, c(-10, 0))$root
+x2 <- uniroot(intersection, c(0, 10))$root
+c(x1, x2)
+```
+
+### Area Enclosed by f and g
+```{r}
+# Integrating the absolute difference of f and g between the roots
+total_area <- integrate(Vectorize(function(x) abs(f(x) - g(x))), x1, x2)$value
+total_area
+```
+
+### Plotting the Functions f(x), g(x) and the Area
+```{r visualizing_the_area_enclosed_by_f_and_g}
+df <- data.frame(x = seq(x1, x2, length.out = 100))
+df$yf <- f(df$x)
+df$yg <- g(df$x)
+
+ggplot(df, aes(x)) +
+  geom_line(aes(y = yf, colour = "f(x)")) +
+  geom_line(aes(y = yg, colour = "g(x)")) +
+  geom_ribbon(aes(ymin = pmin(yf, yg), ymax = pmax(yf, yg)), fill = "blue", alpha = 0.3) +
+  labs(title = "Area between f(x) and g(x)", x = "x", y = "y") +
+  scale_colour_manual("", values = c("f(x)" = "red", "g(x)" = "green")) +
+  theme_minimal()
+```
+
+
