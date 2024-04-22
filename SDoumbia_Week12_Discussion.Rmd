@@ -1,0 +1,90 @@
+---
+title: "SDoumbia_Week12_Discussion"
+author: "Souleymane Doumbia"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Loading the data
+
+```{r mtcars}
+# Loading the mtcars dataset
+data(mtcars)
+```
+
+
+## Creating the necessary variables within the mtcars dataset
+For our model, we can use `mpg` as the dependent variable \( Y \) and include `hp` (horsepower) as the continuous predictor \( X \), `am` as the dichotomous predictor \( D \), and we'll create an interaction term between `hp` and `am`. We'll also include a quadratic term for `hp`.
+
+```{r necessary_variables}
+# We'll use horsepower (hp) as our predictor, am as our dichotomous variable,
+# and mpg as our response variable.
+
+# Creating the quadratic term for horsepower
+mtcars$hp2 <- mtcars$hp^2
+
+# Creating the interaction term between horsepower and transmission type
+mtcars$hp_am <- mtcars$hp * mtcars$am
+```
+
+## Building the Model and Interpretation of Coefficients
+```{r multiple_regression_model}
+# Fitting the multiple regression model
+model_mtcars <- lm(mpg ~ hp + I(hp^2) + am + hp:am, data = mtcars)
+
+# Summary of the model
+summary(model_mtcars)
+```
+
+**Interpretation of Coefficients**
+
+***Intercept (33.3739103):*** The expected miles per gallon (mpg) when all other variables are zero. The intercept is significant with a p-value of \(4.56 \times 10^{-11}\), which is virtually zero.
+
+***hp (Horsepower) (-0.1537710):*** For each additional unit of horsepower, the mpg is expected to decrease by \(0.15377\) units. This is significant with a p-value of \(0.00266\).
+
+***hp^2 (I(hp^2)) (0.0002960):*** The coefficient of the quadratic term of horsepower suggests that there is a very slight curvature in the relationship between horsepower and mpg. This term is significant (p-value = \(0.011253\)), indicating the presence of a non-linear relationship.
+
+***am (Transmission type) (5.9500719):*** Cars with a manual transmission (coded as 1) are expected to have \(5.95\) units higher mpg than those with automatic transmission, all else being equal. This coefficient is significant (p-value = \(0.020611\)).
+
+***hp:am (Interaction term) (-0.0167105):*** The negative coefficient for the interaction term suggests that the positive effect of having a manual transmission decreases as horsepower increases. However, the interaction term is not statistically significant (p-value = \(0.309301\)).
+
+
+
+## Residual Analysis
+
+```{r residual analysis}
+# Residual plots
+par(mfrow=c(2,3))
+plot(model_mtcars)
+
+# Normality of residuals
+hist(residuals(model_mtcars), breaks=10, main="Histogram of Residuals", xlab="Residuals") # Histogram of residuals
+```
+
+
+**Looking at the residual plots:**
+
+***Residuals vs Fitted:*** There are no obvious patterns in this plot, which suggests that the relationship may be linear and the model doesn't suffer from non-linearity. There is, however, one point that stands out (a car with a very high mpg), which could be an outlier.
+
+***Q-Q Plot:*** The points largely follow the line, suggesting that the residuals are approximately normally distributed. However, a couple of points deviate from the line, indicating potential issues with normality, especially in the tails.
+
+***Scale-Location:*** This plot shows residuals spread evenly along the range of predictors, which is a good sign. It suggests that the variance of residuals is constant (homoscedasticity).
+
+***Residuals vs Leverage:*** We don't see many points with high leverage. However, one point, in particular, seems to have high leverage and a high Cook's distance, which could be an influential point. It might be the same point observed in the Residuals vs Fitted plot.
+
+
+**Was the Linear Model Appropriate?**
+The linear model seems appropriate for most of the data, with a high Adjusted R-squared value of 
+0.8036, which indicates that the model explains most of the variability in mpg. The residual analysis does not show any alarming patterns that would suggest the model is not appropriate.
+
+However, there are a few potential outliers and one influential point that could affect the model's accuracy. The presence of an influential point could mean that the model is overfitting to specific data points, which might not generalize well.
+
+
+
+
+
+
