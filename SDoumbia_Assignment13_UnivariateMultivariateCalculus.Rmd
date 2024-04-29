@@ -1,0 +1,321 @@
+---
+title: "SDoumbia_Assignment13_UnivariateMultivariateCalculus"
+author: "Souleymane Doumbia"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Problem 1: 
+Using integration by substitution to solve the integral:
+$$
+\int 4e^{-7x} \, dx
+$$
+
+Let $u = -7x$, therefore $du = -7dx$ or $dx = -\frac{1}{7}du$. Substituting into the integral, we get:
+$$
+\int 4e^{u} \cdot \frac{du}{-7} = -\frac{4}{7} \int e^{u} \, du = -\frac{4}{7}e^{u} + C
+$$
+Now, since $u = -7x$, we replace $u$ back with $-7x$:
+   $$
+   -\frac{4}{7} e^{u} + C = -\frac{4}{7} e^{-7x} + C
+   $$
+
+Thus, the integral $\int 4e^{-7x} \, dx$ evaluates to:
+$$
+\boxed{-\frac{4}{7} e^{-7x} + C}
+$$
+
+## Problem 2: 
+To solve for the function \(N(t)\) that estimates the level of contamination in a pond, we start by setting up the differential equation based on the given rate of change of contamination. The rate of change \(dN/dt\) is described as follows:
+
+
+\[
+\frac{dN}{dt} = -\frac{3150}{t^4} - 220
+\]
+
+where \( t \) is the number of days since the treatment began. 
+
+### Let s find \(N(t)\):
+
+The function \(N(t)\) can be found by integrating the rate of change:
+
+\[
+N(t) = \int \left(-\frac{3150}{t^4} - 220\right) \, dt
+\]
+
+This integral can be computed as follows:
+
+\[
+N(t) = \int -\frac{3150}{t^4} \, dt - \int 220 \, dt
+\]
+
+Integrating term-by-term, we get:
+
+\[
+N(t) = 1050 \frac{1}{t^3} - 220t + C
+\]
+
+where \( C \) is the integration constant.
+
+### Applying the Initial Condition
+
+It is given that after 1 day the level of contamination was 6530 bacteria per cubic centimeter. This initial condition helps us determine \(C\):
+
+\[
+1050 \cdot \frac{1}{1^3} - 220 \cdot 1 + C = 6530
+\]
+
+\[
+1050 - 220 + C = 6530
+\]
+
+\[
+C = 6530 - 1050 + 220 = 5700
+\]
+
+Thus, the function that models the level of contamination \( N(t) \) is:
+
+\[
+N(t) = 1050 \frac{1}{t^3} - 220t + 5700
+\]
+
+
+## Problem 3
+To find the total area of the red rectangles under the line described by the function \( f(x) = 2x - 9 \) from \( x = 4.5 \) to \( x = 8.5 \), we calculate the definite integral of the function over this range. The integral will give us the area between the line and the x-axis.
+
+**Function Definition**:
+   The line equation is given by:
+   $$
+   f(x) = 2x - 9
+   $$
+   We need to integrate this function from \( x = 4.5 \) to \( x = 8.5 \).
+
+**Calculating the Integral**:
+   The integral of \( f(x) \) from \( x = 4.5 \) to \( x = 8.5 \) is:
+   $$
+   \int_{4.5}^{8.5} (2x - 9) \, dx
+   $$
+   Solving this integral:
+   $$
+   \int (2x - 9) \, dx = x^2 - 9x + C
+   $$
+   Applying the limits of integration:
+   $$
+   \left[ x^2 - 9x \right]_{4.5}^{8.5} = (8.5^2 - 9 \times 8.5) - (4.5^2 - 9 \times 4.5)
+   $$
+   $$
+   = (72.25 - 76.5) - (20.25 - 40.5)
+   $$
+   $$
+   = -4.25 + 20.25 = 16
+   $$
+
+
+## Problem 4
+
+To find the area of the region bounded by the curves given by the equations \(y = x^2 - 2x - 2\) and \(y = x + 2\), we will follow these steps:
+
+**Setting the Equations Equal to Find Intersection Points**:
+   $$
+   x^2 - 2x - 2 = x + 2
+   $$
+   solving for \(x\):
+   $$
+   x^2 - 3x - 4 = 0
+   $$
+   Factorizing the quadratic equation:
+   $$
+   (x - 4)(x + 1) = 0
+   $$
+   This gives the solutions \(x = 4\) and \(x = -1\).
+
+**Determining which Function is Above the Other**:
+   Substituting values between \(x = -1\) and \(x = 4\) into both functions to determine which is above the other. We observed that \(y = x + 2\) lies above \(y = x^2 - 2x - 2\) in this interval.
+
+**Setting Up the Integral for the Area**:
+  
+   Here, \(f(x) = x + 2\) and \(g(x) = x^2 - 2x - 2\). 
+   $$
+   A = \int_{-1}^{4} [(x + 2) - (x^2 - 2x - 2)] \, dx = \int_{-1}^{4} [-x^2 + 3x + 4] \, dx
+   $$
+
+**Computing the Integral**:
+   $$
+   A = \left[ -\frac{1}{3}x^3 + \frac{3}{2}x^2 + 4x \right]_{-1}^{4}
+   $$
+   $$
+   A = \left( -\frac{1}{3}(4)^3 + \frac{3}{2}(4)^2 + 4(4) \right) - \left( -\frac{1}{3}(-1)^3 + \frac{3}{2}(-1)^2 + 4(-1) \right)
+   $$
+   Simplifying to get:
+   $$
+   A = \left( -\frac{64}{3} + 24 + 16 \right) - \left( \frac{1}{3} + \frac{3}{2} - 4 \right)
+   $$
+   $$
+   A = -\frac{64}{3} + 40 + \frac{1}{3} - \frac{3}{2} + 4
+   $$
+   \[
+   A = -\frac{64}{3} + \frac{1}{3} - \frac{4.5}{3} = -\frac{64 + 4.5 - 1}{3} + 44= -\frac{67.5}{3} = 40 -22.5
+   \]
+
+Thus,  
+\[
+Area = 21.5
+\]
+
+
+## Problem 5
+
+### Economic Order Quantity (EOQ) Model
+To determine the optimal lot size and number of orders per year that minimize inventory costs for a beauty supply store, we use the Economic Order Quantity (EOQ) model. 
+
+The EOQ model is defined by the following parameters and formula:
+
+- **Annual Demand (\(D\))**: The total units demanded over the course of a year.
+
+- **Holding Cost (\(H\))**: The cost to hold one unit in inventory for a year.
+
+- **Ordering Cost (\(S\))**: The fixed cost associated with placing an order.
+
+The formula for EOQ is given by:
+$$
+EOQ = \sqrt{\frac{2DS}{H}}
+$$
+Where:
+- \(D\) is the annual demand,
+- \(S\) is the ordering cost per order,
+- \(H\) is the holding cost per unit per year.
+
+### Given Values
+
+- Annual demand \(D = 110\) flat irons.
+
+- Ordering cost \(S = \$8.25\) per order.
+
+- Holding cost \(H = \$3.75\) per unit per year.
+
+```{r eoq_calculation}
+# Define the parameters
+D <- 110  # Annual demand
+S <- 8.25  # Ordering cost per order
+H <- 3.75  # Holding cost per unit per year
+
+# Calculate EOQ
+EOQ <- sqrt((2 * D * S) / H)
+EOQ
+```
+
+### Calculate Number of Orders Per Year
+```{r Number_of_Orders_Per_Year}
+number_of_orders <- D / EOQ
+number_of_orders
+```
+
+
+### Calculate Total Inventory Cost
+The total inventory cost (TC) when ordering at the EOQ can be calculated as:
+
+\[
+TC = \left(\frac{D}{Q} \times S\right) + \left(\frac{Q}{2} \times H\right)
+\]
+
+where \(Q\) is the order quantity, which is the EOQ in this case.
+
+```{r Total_Inventory_Cost}
+total_cost <- (D / EOQ) * S + (EOQ / 2) * H
+total_cost
+```
+
+
+## Problem 6
+Use integration by parts to solve the integral below:
+\[ \int x \ln(9x) \, dx \]
+
+
+### Integration by Parts
+
+integration by parts to solve:
+
+\[ \int \ln(9x) \cdot x \, dx \]
+
+We choose:
+\[ u = \ln(9x), \quad dv = x \, dx \]
+
+We integrate to find \( du \) and \( v \):
+\[ du = \frac{1}{x} \, dx, \quad v = \frac{x^2}{2} \]
+
+Using the integration by parts formula:
+\[ \int u \, dv = uv - \int v \, du \]
+
+We substitute \( u \), \( dv \), \( du \), and \( v \):
+\[ \int \ln(9x) \cdot x \, dx = \frac{x^2}{2} \ln(9x) - \int \frac{x^2}{2} \cdot \frac{1}{x} \, dx \]
+\[ = \frac{x^2}{2} \ln(9x) - \int \frac{x}{2} \, dx \]
+\[ = \frac{x^2}{2} \ln(9x) - \frac{x^2}{4} + C \]
+
+Where \( C \) is a constant. 
+
+
+## Problem 7
+Determine whether the function \( f(x) \) is a probability density function on the interval \([1, e^6]\). If not, determine the value of the definite integral. The function is given by
+\[ f(x) = \frac{1}{6x}. \]
+
+#### Checking if a Function is a Probability Density Function
+
+To determine whether the function \( f(x) = \frac{1}{6}x \) is a probability density function (PDF) on the interval \([1, e^6]\), we need to verify two conditions:
+
+1. The function must be non-negative over the interval.
+2. The integral of the function over the interval must equal 1.
+
+#### Step 1: Check Non-Negativity
+
+For \( f(x) = \frac{1}{6}x \), since \( x \geq 1 \) over the interval \([1, e^6]\), \( f(x) \) is non-negative.
+
+#### Step 2: Check if the Integral Equals 1
+
+We calculate the integral of \( f(x) \) from 1 to \( e^6 \):
+
+\[
+\int_{1}^{e^6} \frac{1}{6}x \, dx = \frac{1}{6} \int_{1}^{e^6} x \, dx
+\]
+
+This integrates to:
+
+\[
+= \frac{1}{6} \left[\frac{x^2}{2}\right]_{1}^{e^6} = \frac{1}{6} \left(\frac{(e^6)^2}{2} - \frac{1^2}{2}\right) = \frac{1}{6} \left(\frac{e^{12}}{2} - \frac{1}{2}\right)
+\]
+
+\[
+= \frac{e^{12} - 1}{12}
+\]
+
+Since this value is not equal to 1, \( f(x) \) is not a PDF.
+
+#### Correcting \( f(x) \) to Be a PDF
+
+To correct \( f(x) \), we need to find a constant \( c \) such that:
+
+\[
+c \int_{1}^{e^6} x \, dx = 1
+\]
+
+Solving for \( c \):
+
+\[
+c \cdot \frac{e^{12} - 1}{2} = 1 \Rightarrow c = \frac{2}{e^{12} - 1}
+\]
+
+Thus, the corrected function is:
+
+\[
+\boxed{f(x) = \frac{2}{e^{12} - 1}x}
+\]
+
+This function \( f(x) \) now qualifies as a PDF over the interval \([1, e^6]\).
+
+
+
+* * *
+
