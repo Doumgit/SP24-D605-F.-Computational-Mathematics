@@ -1,0 +1,60 @@
+---
+title: "SDoumbia, Chap12, Exercises 7-8-10, P.689"
+author: "Souleymane Doumbia"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Domain and Range of Multi-variable Functions
+
+## Function 1: $f(x, y) = x^2 + y^2 + 2$
+
+### Domain
+The function $f(x, y) = x^2 + y^2 + 2$ involves square terms of $x$ and $y$, which are defined for all real numbers. Therefore, the domain of $f$ is all ordered pairs of real numbers:
+\[ \text{Domain} = \mathbb{R}^2 \]
+
+### Range
+Since $x^2$ and $y^2$ are both non-negative, the smallest value of $x^2 + y^2$ is 0 (occurring when both $x$ and $y$ are 0). Thus, the minimum value of $f(x, y)$ is 2. There is no upper limit to the values of $x^2 + y^2$, so:
+\[ \text{Range} = [2, \infty) \]
+
+## Function 2: $f(x, y) = x + 2y$
+
+### Domain
+The function $f(x, y) = x + 2y$ is a linear function of $x$ and $y$, and there are no restrictions on the values of $x$ and $y$. Hence:
+\[ \text{Domain} = \mathbb{R}^2 \]
+
+### Range
+As a linear function, $f(x, y)$ can take any real number depending on the values of $x$ and $y$. Therefore, 
+\[ \text{Range} = \mathbb{R} \]
+
+## Function 3: $f(x, y) = \frac{1}{x + 2y}$
+
+### Domain
+The function $f(x, y) = \frac{1}{x + 2y}$ is defined as long as the denominator is not zero. Therefore, the domain excludes points where \( x + 2y = 0 \). Solving for \( y \) gives \( y = -\frac{x}{2} \), which is a line in the xy-plane. Thus, the domain of $f$ is:
+\[ \text{Domain} = \mathbb{R}^2 \setminus \{(x, y) \mid y = -\frac{x}{2}\} \]
+
+### Range
+Since $f(x, y)$ can approach any non-zero real number as \( x + 2y \) approaches any non-zero value, and it can approach both positive and negative infinity depending on whether \( x + 2y \) approaches zero from positive or negative directions respectively, the range of \( f \) is all real numbers except for zero:
+\[ \text{Range} = \mathbb{R} \setminus \{0\} \]
+
+# Conclusion
+
+We have analyzed the domain and range for three multi-variable functions:
+
+1. $f(x, y) = x^2 + y^2 + 2$ with domain $\mathbb{R}^2$ and range $[2, \infty)$.
+
+2. $f(x, y) = x + 2y$ with domain and range both being $\mathbb{R}^2$ and $\mathbb{R}$ respectively.
+
+3. $f(x, y) = \frac{1}{x + 2y}$ with domain $\mathbb{R}^2 \setminus \{(x, y) \mid y = -\frac{x}{2}\}$ and range $\mathbb{R} \setminus \{0\}$.
+
+
+
+
+* * *
+
+
+

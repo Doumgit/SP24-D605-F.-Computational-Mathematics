@@ -1,0 +1,74 @@
+---
+title: "SDoumbia_Week14_TaylorSeriesApproximations"
+author: "Souleymane Doumbia"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(pracma)
+```
+
+# Taylor Series Expansions of Popular Functions
+
+
+## Function $f(x) = \frac{1}{1-x}$
+The Taylor series expansion of $f(x) = \frac{1}{1-x}$ around $x = 0$ is:
+
+```{r '1-x c==0'}
+fx <- function(x) 1/(1 - x)
+taylor_series_1x <- taylor(fx, x0 = 0, n = 7)
+print(taylor_series_1x)
+```
+
+
+
+## Function $f(x) = e^x$
+The Taylor series expansion for $f(x) = e^x$ around $x = 0$.
+
+```{r taylor_series_ex}
+ex <- function(x) exp(x)
+taylor_series_ex <- taylor(ex, x0 = 0, n = 8) 
+print(taylor_series_ex)
+```
+
+
+## Function $f(x) = \ln(1 + x)$
+For $f(x) = \ln(1 + x)$, the expansion is valid for $-1 < x \leq 1$.
+
+```{r taylor_series_ln1x}
+ln1x <- function(x) log(1 + x)
+taylor_series_ln1x <- taylor(ln1x, x0 = 0, n = 6)
+print(taylor_series_ln1x)
+```
+
+## Function $f(x) = x^{1/2}$
+The Taylor series expansion for $f(x) = x^{1/2}$ around $x = 1$.
+
+```{r taylor_series_sqrtx}
+# Manually computing derivatives and Taylor series coefficients because having issues with 'taylor()' function
+f <- function(x) sqrt(x)
+f1 <- function(x) (1/2) * x^(-1/2)
+f2 <- function(x) -(1/4) * x^(-3/2)
+f3 <- function(x) (3/8) * x^(-5/2)
+f4 <- function(x) -(15/16) * x^(-7/2)
+f5 <- function(x) (105/32) * x^(-9/2)
+f6 <- function(x) -(945/64) * x^(-11/2)
+
+x0 <- 1 # Easier since sqrt(1) = 1
+
+taylor_series_sqrtx <- c(f(x0), f1(x0), f2(x0)/factorial(2), f3(x0)/factorial(3), f4(x0)/factorial(4), f5(x0)/factorial(5), f6(x0)/factorial(6))
+
+print(taylor_series_sqrtx)
+```
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,61 @@
+---
+title: "SDoumbia Chap. 8.8, Exercise 9, P. 496"
+author: "Souleymane Doumbia"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+# Finding the $n^{th}$ Taylor Series for $f(x) = e^{-x}$ at $c = 0$
+
+## Formula Derivation
+
+To find the Taylor series for the function $f(x) = e^{-x}$ centered at $c = 0$, we first compute the derivatives of $f(x)$ at $x = 0$. The Taylor series expansion of a function $f(x)$ around a point $c$ is given by:
+
+\[
+f(x) = \sum_{n=0}^{\infty} \frac{f^{(n)}(c)}{n!}(x-c)^n
+\]
+
+For $f(x) = e^{-x}$ and $c = 0$, we observe the following pattern in the derivatives:
+
+- $f(x) = e^{-x}$
+- $f(0) = 1$
+- $f'(x) = -e^{-x}$
+- $f'(0) = -1$
+- $f''(x) = e^{-x}$
+- $f''(0) = 1$
+- Continuing this pattern, the $n$-th derivative evaluated at $x = 0$ is:
+
+\[
+f^{(n)}(0) = (-1)^n
+\]
+
+Hence, the formula for the Taylor series becomes:
+
+\[
+f(x) = \sum_{n=0}^{\infty} \frac{(-1)^n}{n!}x^n
+\]
+
+## Implementation Using Pracma package
+
+We will now use R to compute the Taylor series expansion of $f(x) = e^{-x}$ at $c = 0$ up to the 6th order, using the `pracma` package.
+
+```{r}
+# Load the pracma package; 
+library(pracma)
+
+# Define the function
+myf <- function(x) exp(-x)
+
+# Compute the Taylor series
+taylor_series <- taylor(myf, x0 = 0, n = 6)
+
+# Print the result
+print(taylor_series)
+```
+

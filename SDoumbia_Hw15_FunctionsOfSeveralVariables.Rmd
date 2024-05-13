@@ -1,0 +1,232 @@
+---
+title: "Hw15 Functions Of Several Variables"
+author: "Souleymane Doumbia"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# $\underline{PROBLEM  1}$
+
+Given points: (5.6, 8.8), (6.3, 12.4), (7, 14.8), (7.7, 18.2), (8.4, 20.8)
+
+We use the method of least squares to find the best-fitting line for the given data points. 
+
+### Linear Regression Equation
+The linear regression equation is given by:
+
+\[ y = mx + b \]
+
+where:
+- \( y \) is the dependent variable,
+- \( x \) is the independent variable,
+- \( m \) is the slope of the line,
+- \( b \) is the y-intercept.
+
+### Calculation of Slope and Intercept
+The slope \( m \) and intercept \( b \) are calculated using:
+
+\[ m = \frac{N(\sum xy) - (\sum x)(\sum y)}{N(\sum x^2) - (\sum x)^2} \]
+\[ b = \frac{(\sum y) - m(\sum x)}{N} \]
+
+where:
+- \( N \) is the number of data points,
+- \( \sum xy \) is the sum of the product of each pair of \( x \) and \( y \),
+- \( \sum x \), \( \sum y \) are the sums of \( x \) and \( y \) values respectively,
+- \( \sum x^2 \) is the sum of the squares of \( x \) values.
+
+### R Code for Calculation
+
+```{r regression_calculation}
+# Defining the data points
+x <- c(5.6, 6.3, 7, 7.7, 8.4)
+y <- c(8.8, 12.4, 14.8, 18.2, 20.8)
+
+# Calculating for slope (m) and intercept (b)
+N <- length(x)
+sum_x <- sum(x)
+sum_y <- sum(y)
+sum_xy <- sum(x*y)
+sum_x2 <- sum(x^2)
+
+# Slope
+m <- (N * sum_xy - sum_x * sum_y) / (N * sum_x2 - sum_x^2)
+
+# Intercept
+b <- (sum_y - m * sum_x) / N
+
+# Rounding to the nearest hundredth
+m <- round(m, 2)
+b <- round(b, 2)
+
+# Output the slope and intercept
+c(m = m, b = b)
+```
+
+
+# $\underline{PROBLEM  3}$
+
+## Revenue Analysis for Different Product Pricings
+
+## Defineing the Revenue Function
+
+We have:
+
+- **House Brand**: Estimated units sold \( = 81 - 21x + 17y \)
+- **Name Brand**: Estimated units sold \( = 40 + 11x - 23y \)
+
+Given these estimates, the revenue function, representing the total sales from each product, is:
+
+\[ R(x, y) = x(81 - 21x + 17y) + y(40 + 11x - 23y) \]
+
+Expanding and simplifying, we have:
+
+\[ R(x, y) = -21x^2 + 28xy - 23y^2 + 81x + 40y \]
+
+This function calculates the total revenue based on prices \( x \) and \( y \) for the house and name brands, respectively.
+
+## Computing Revenue for Specific Prices
+
+For prices:
+- House brand \( x = \$2.30 \)
+- Name brand \( y = \$4.10 \)
+
+The revenue can be calculated by substituting these prices into the revenue function:
+
+\[ R(2.30, 4.10) = -21(2.30)^2 + 28(2.30)(4.10) - 23(4.10)^2 + 81(2.30) + 40(4.10) \]
+
+
+Then, this will yield the total revenue from selling the products at these prices, which is:
+```{r calculate_revenue}
+x <- 2.30
+y <- 4.10
+R <- -21*x^2 + 28*x*y - 23*y^2 + 81*x + 40*y
+R_rounded <- round(R, 2)
+R_rounded
+```
+
+
+
+# $\underline{PROBLEM  4}$
+
+## Minimizing Production Costs
+
+A company must produce 96 units weekly between two plants. The cost function is:
+
+\[ C(x, y) = 16x^2 + 16y^2 + 7x + 25y + 700 \]
+
+where \( x \) and \( y \) are the units produced in Los Angeles and Denver, respectively.
+
+
+Our objective is to determine how many units should be produced at each location to minimize the total cost, given the constraint \( x + y = 96 \).
+
+
+Using the method of Lagrange multipliers, we set up the Lagrangian as follows:
+
+\[ L(x, y, \lambda) = 16x^2 + 16y^2 + 7x + 25y + 700 + \lambda (96 - x - y) \]
+
+### Calculating the Derivatives
+
+Derivatives of the Lagrangian are set to zero to solve for \( x \), \( y \), and \( \lambda \):
+
+\[ \frac{\partial L}{\partial x} = 32x + 7 - \lambda = 0 \]
+\[ \frac{\partial L}{\partial y} = 32y + 25 - \lambda = 0 \]
+\[ \frac{\partial L}{\partial \lambda} = 96 - x - y = 0 \]
+
+### Solving the System of Equations
+
+```{r solve_system}
+library(nleqslv)
+
+# System of equations based on the Lagrangian derivatives
+system_eq <- function(z) {
+  x <- z[1]
+  y <- z[2]
+  lambda <- z[3]
+
+  # System of equations
+  eq1 <- 32*x + 7 - lambda
+  eq2 <- 32*y + 25 - lambda
+  eq3 <- 96 - x - y
+
+  c(eq1, eq2, eq3)
+}
+
+# Initial guesses for x, y, and lambda
+z_start <- c(x = 48, y = 48, lambda = 100)
+
+# Solving the system
+solution <- nleqslv(x = z_start, fn = system_eq)
+
+# Extracting solutions
+x_opt <- solution$x[1]
+y_opt <- solution$x[2]
+
+# Output the results
+c("Units to produce in Los Angeles" = x_opt, "Units to produce in Denver" = y_opt)
+```
+
+
+# $\underline{PROBLEM  5}$
+
+We are given the double integral over the region \( R \) defined by \( 2 \leq x \leq 4 \) and \( 2 \leq y \leq 4 \) for the function \( e^{8x+3y} \).
+
+The function to integrate is \( e^{8x + 3y} \), and the region of integration is defined by the ranges of \( x \) and \( y \).
+
+\[ R: 2 \leq x \leq 4, 2 \leq y \leq 4 \]
+
+## Step-by-Step Calculation
+
+### Step 1: 
+
+We start by setting up the double integral:
+
+\[ \int_{2}^{4} \int_{2}^{4} e^{8x+3y} \, dy \, dx \]
+
+### Step 2: Integrate with Respect to \( y \)
+
+First, integrate with respect to \( y \), treating \( x \) as a constant:
+
+\[ \int_{2}^{4} e^{8x+3y} \, dy = e^{8x} \int_{2}^{4} e^{3y} \, dy \]
+
+The integration with respect to \( y \) yields:
+
+\[ = e^{8x} \left[ \frac{e^{3y}}{3} \right]_{y=2}^{y=4} \]
+\[ = e^{8x} \left( \frac{e^{12}}{3} - \frac{e^6}{3} \right) \]
+\[ = \frac{e^{8x}}{3} (e^{12} - e^6) \]
+
+### Step 3: Integrate with Respect to \( x \)
+
+Now, integrating the result with respect to \( x \):
+
+\[ \int_{2}^{4} \frac{e^{8x}}{3} (e^{12} - e^6) \, dx \]
+\[ = \frac{e^{12} - e^6}{3} \int_{2}^{4} e^{8x} \, dx \]
+
+The integration with respect to \( x \) is:
+
+\[ = \frac{e^{12} - e^6}{3} \left[ \frac{e^{8x}}{8} \right]_{x=2}^{x=4} \]
+\[ = \frac{e^{12} - e^6}{3} \left( \frac{e^{32}}{8} - \frac{e^{16}}{8} \right) \]
+\[ = \frac{(e^{12} - e^6) (e^{32} - e^{16})}{24} \]
+
+
+Therefore, the total value of the double integral over the specified region \( R \) is:
+
+\[ \frac{(e^{12} - e^6) (e^{32} - e^{16})}{24} \]
+
+
+### Estimating the result:
+```{r calculate_integral}
+# Evaluate the final expression
+e <- exp(1) # Base of the natural logarithm
+result <- (e^12 - e^6) * (e^32 - e^16) / 24
+result
+```
+
+
+
+* * *
+
+
