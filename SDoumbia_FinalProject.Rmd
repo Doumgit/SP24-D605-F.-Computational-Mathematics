@@ -1,0 +1,670 @@
+---
+title: "SDoumbia Final Project"
+author: "Souleymane Doumbia"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Libraries
+```{r libraries}
+library(tidyverse)
+library(dplyr)
+library(ggplot2)
+library(knitr)
+library(kableExtra)
+library(MASS)
+library(caret)
+library(car)
+```
+
+
+## I. Loading the 'train.csv' dataset
+```{r train_dataset}
+train_data = read.csv('train.csv')
+head(train_data,3)
+```
+
+## II. Variables Selection and Distribution of TotalBsmtSF
+
+```{r TotalBsmtSF_Distribution}
+# TotalBsmtSF is right skewed
+ggplot(train_data, aes(x = TotalBsmtSF)) +
+  geom_histogram(binwidth = 100, fill = "blue", alpha = 0.7) +
+  labs(title = "TotalBsmtSF Histogram") +
+  theme_minimal()
+```
+
+### 1. Calculating quartiles for TotalBsmtSF and SalePrice
+```{r quartiles_calculation}
+# Calculating quartiles
+x_3rd_quartile <- quantile(train_data$TotalBsmtSF, 0.75, na.rm = TRUE)
+y_2nd_quartile <- quantile(train_data$SalePrice, 0.50, na.rm = TRUE)
+
+print(paste("3rd Quartile of TotalBsmtSF:", x_3rd_quartile))
+print(paste("2nd Quartile of SalePrice:", y_2nd_quartile))
+```
+
+### 2. Calculating probabilities and create table of counts
+```{r probability_and_table_of_counts}
+# New variables based on quartiles
+train_data$TotalBsmtSF_above_3rd <- train_data$TotalBsmtSF > x_3rd_quartile
+train_data$SalePrice_above_2nd <- train_data$SalePrice > y_2nd_quartile
+
+# Creating table of counts
+counts <- table(train_data$TotalBsmtSF_above_3rd, train_data$SalePrice_above_2nd)
+
+# Calculating probabilities
+P_X_gt_x_given_Y_gt_y <- counts[2, 2] / sum(counts[, 2])
+P_X_gt_x_and_Y_gt_y <- counts[2, 2] / sum(counts)
+P_X_lt_x_given_Y_gt_y <- counts[1, 2] / sum(counts[, 2])
+
+print(paste("P(X > x | Y > y):", P_X_gt_x_given_Y_gt_y))
+print(paste("P(X > x, Y > y):", P_X_gt_x_and_Y_gt_y))
+print(paste("P(X < x | Y > y):", P_X_lt_x_given_Y_gt_y))
+
+# Creating the contingency table
+contingency_table <- table(cut(train_data$TotalBsmtSF, breaks=c(-Inf, x_3rd_quartile, Inf)),
+                           cut(train_data$SalePrice, breaks=c(-Inf, y_2nd_quartile, Inf)))
+
+# Converting to matrix and add row and column totals
+contingency_matrix <- addmargins(as.matrix(contingency_table))
+
+# Renaming rows and columns for clarity
+rownames(contingency_matrix) <- c("<=3rd quartile", ">3rd quartile", "Total")
+colnames(contingency_matrix) <- c("<=2nd quartile", ">2nd quartile", "Total")
+
+# Creating a new matrix with additional row and column for labels
+new_matrix <- matrix("", nrow=nrow(contingency_matrix) + 1, ncol=ncol(contingency_matrix) + 1)
+new_matrix[1, 2:ncol(new_matrix)] <- c("<=2nd quartile", ">2nd quartile", "Total")
+new_matrix[2:nrow(new_matrix), 1] <- c("<=3rd quartile", ">3rd quartile", "Total")
+new_matrix[2:nrow(new_matrix), 2:ncol(new_matrix)] <- contingency_matrix
+new_matrix[1, 1] <- "X/Y"
+
+# Displaying the table using kable
+kable(new_matrix, format = "html", caption = "Contingency Table of TotalBsmtSF and SalePrice with Custom Labels") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))
+
+```
+
+### Interpretation of Probabilities
+
+#### Given:
+- **\( X \)**: TotalBsmtSF (Total square feet of basement area)
+- **\( Y \)**: SalePrice
+
+#### Quartiles:
+- **3rd Quartile of \( X \) (TotalBsmtSF)**: 1298.25
+- **2nd Quartile of \( Y \) (SalePrice)**: \$163,000
+
+#### Probabilities:
+
+1. **\( P(X > x \mid Y > y) \)**
+   - Probability that the basement area is greater than 1298.25 square feet given that the sale price is greater than \$163,000.
+   - **Interpretation**: Among the houses that sold for more than \$163,000, approximately 45.19\% have a basement area larger than 1298.25 square feet. This indicates that larger basement areas are somewhat common in higher-priced homes, but not overwhelmingly so.
+
+2. **\( P(X > x \land Y > y) \)**
+   - Probability that the basement area is greater than 1298.25 square feet and the sale price is greater than \$163,000.
+   - **Interpretation**: About 22.53\% of all houses in the dataset have both a basement area larger than 1298.25 square feet and a sale price greater than \$163,000. This suggests that having a larger basement area is associated with higher sale prices. 
+   
+3. **\( P(X < x \mid Y > y) \)**
+   - Probability that the basement area is less than 1298.25 square feet given that the sale price is greater than \$163,000.
+   - **Interpretation**: Among the houses that sold for more than \$163,000, approximately 54.81\% have a basement area smaller than 1298.25 square feet. This suggests that while larger basement areas are valued, a significant portion of higher-priced homes have smaller basement areas, indicating that other factors also play a crucial role in determining the sale price.
+
+
+
+
+## III. Independence Check in R
+
+### 1. New Variables A and B and their Probabilities
+```{r A_&_B_and_their_Probabilities}
+# Createing new variables based on quartiles
+train_data$A <- train_data$TotalBsmtSF > x_3rd_quartile
+train_data$B <- train_data$SalePrice > y_2nd_quartile
+
+# Calculating probabilities
+P_A <- mean(train_data$A)
+P_B <- mean(train_data$B)
+P_A_given_B <- mean(train_data$A & train_data$B) / P_B
+
+# probabilities
+print(paste("P(A):", P_A))
+print(paste("P(B):", P_B))
+print(paste("P(A | B):", P_A_given_B))
+```
+
+
+### 2. Mathematical Independence
+```{r Mathematical_Independence}
+# Checking if P(A | B) ≈ P(A) * P(B)
+P_A_times_P_B <- P_A * P_B
+independence_check <- abs(P_A_given_B - P_A_times_P_B) < 0.01  # threshold for checking near equality
+
+print(paste("P(A | B) ≈ P(A) * P(B):", independence_check))
+```
+
+### 3. Chi-Square Test
+```{r}
+# Chi-Square test for association
+contingency_table <- table(train_data$A, train_data$B)
+chi_square_test <- chisq.test(contingency_table)
+
+print(chi_square_test)
+```
+### Interpretation of Independence Check Results
+
+#### Mathematical Check
+- **Result**: \( P(A \mid B) \approx P(A) \times P(B) \) is `FALSE`.
+- **Interpretation**: Mathematically, the condition \( P(A \mid B) \approx P(A) \times P(B) \) is not satisfied. This suggests that the variables \( A \) (TotalBsmtSF > 1298.25) and \( B \) (SalePrice > \$163,000) are not independent.
+
+#### Chi-Square Test
+- The Chi-Square test for independence assesses whether the observed frequencies in a contingency table deviate significantly from the expected frequencies if the variables were independent.
+- The Chi-Square test here gives a very small p-value (less than 2.2e-16), which is far below the typical significance level of 0.05. This strongly suggests rejecting the null hypothesis of independence between \( A \) and \( B \).
+
+#### Conclusion
+Based on both the mathematical check and the Chi-Square test results, we conclude that the variables \( A \) (TotalBsmtSF > 1298.25) and \( B \) (SalePrice > \$163,000) are dependent. There is a significant association between the size of the basement area and the sale price of the house.
+
+## IV. Descriptive and Inferential Statistics
+
+### 1. Univariate Descriptive Statistics
+```{r Univariate_Descriptive_Statistics}
+# Summary statistics for TotalBsmtSF and SalePrice
+summary_stats <- train_data %>%
+  summarise(
+    TotalBsmtSF_mean = mean(TotalBsmtSF, na.rm = TRUE),
+    TotalBsmtSF_median = median(TotalBsmtSF, na.rm = TRUE),
+    TotalBsmtSF_sd = sd(TotalBsmtSF, na.rm = TRUE),
+    SalePrice_mean = mean(SalePrice, na.rm = TRUE),
+    SalePrice_median = median(SalePrice, na.rm = TRUE),
+    SalePrice_sd = sd(SalePrice, na.rm = TRUE)
+  )
+print(summary_stats)
+
+# Histograms for TotalBsmtSF and SalePrice
+ggplot(train_data, aes(x = TotalBsmtSF)) +
+  geom_histogram(binwidth = 100, fill = "blue", alpha = 0.7) +
+  labs(title = "Histogram of TotalBsmtSF") +
+  theme_minimal()
+
+ggplot(train_data, aes(x = SalePrice)) +
+  geom_histogram(binwidth = 10000, fill = "green", alpha = 0.7) +
+  labs(title = "Histogram of SalePrice") +
+  theme_minimal()
+
+# Boxplots for TotalBsmtSF and SalePrice
+ggplot(train_data, aes(y = TotalBsmtSF)) +
+  geom_boxplot(fill = "blue", alpha = 0.7) +
+  labs(title = "Boxplot of TotalBsmtSF") +
+  theme_minimal()
+
+ggplot(train_data, aes(y = SalePrice)) +
+  geom_boxplot(fill = "green", alpha = 0.7) +
+  labs(title = "Boxplot of SalePrice") +
+  theme_minimal()
+```
+
+
+### 2. Scatterplot of X and Y
+```{r Scatterplot_of_X_&_Y}
+# Scatterplot of TotalBsmtSF and SalePrice
+ggplot(train_data, aes(x = TotalBsmtSF, y = SalePrice)) +
+  geom_point(alpha = 0.5) +
+  labs(title = "Scatterplot of TotalBsmtSF and SalePrice",
+       x = "TotalBsmtSF",
+       y = "SalePrice") +
+  theme_minimal()
+```
+
+
+### 3. 95% Confidence Interval for the Difference in Means
+```{r 95%_Confidence_Interval_for_the_Difference_in_Means}
+# 95% Confidence Interval for the mean of TotalBsmtSF
+mean_totalbsmt <- mean(train_data$TotalBsmtSF, na.rm = TRUE)
+se_totalbsmt <- sd(train_data$TotalBsmtSF, na.rm = TRUE) / sqrt(length(train_data$TotalBsmtSF))
+ci_totalbsmt <- mean_totalbsmt + c(-1, 1) * qt(0.975, df = length(train_data$TotalBsmtSF) - 1) * se_totalbsmt
+
+print(paste("95% Confidence Interval for the mean of TotalBsmtSF: (", ci_totalbsmt[1], ", ", ci_totalbsmt[2], ")", sep = ""))
+
+# 95% Confidence Interval for the mean of SalePrice
+mean_saleprice <- mean(train_data$SalePrice, na.rm = TRUE)
+se_saleprice <- sd(train_data$SalePrice, na.rm = TRUE) / sqrt(length(train_data$SalePrice))
+ci_saleprice <- mean_saleprice + c(-1, 1) * qt(0.975, df = length(train_data$SalePrice) - 1) * se_saleprice
+
+print(paste("95% Confidence Interval for the mean of SalePrice: (", ci_saleprice[1], ", ", ci_saleprice[2], ")", sep = ""))
+```
+
+### 4. Correlation Matrix
+```{r Correlation_Matrix}
+# Select another quantitative variable, e.g., GrLivArea
+train_data_selected <- train_data %>%
+  dplyr::select(TotalBsmtSF, SalePrice, GrLivArea)
+
+# Calculate the correlation matrix
+cor_matrix <- cor(train_data_selected, use = "complete.obs")
+print(cor_matrix)
+
+```
+
+### 5. Hypothesis Testing for Correlation
+```{r Hypothesis_Testing_for_Correlation}
+# Testing the hypothesis that the correlation between TotalBsmtSF and SalePrice is 0
+cor_test <- cor.test(train_data$TotalBsmtSF, train_data$SalePrice, conf.level = 0.99)
+print(cor_test)
+
+# 99% Confidence Interval for the correlation coefficient
+cor_ci <- cor_test$conf.int
+print(paste("99% Confidence Interval for the correlation coefficient: (", cor_ci[1], ", ", cor_ci[2], ")", sep = ""))
+```
+### Interpretation - Meaning of the Analysis
+Based on the outputs and plots above, we can draw several insights about the relationship between TotalBsmtSF (Total square feet of basement area) and SalePrice (the property's sale price in dollars):
+
+#### Univariate Descriptive Statistics
+- The mean TotalBsmtSF is 1057.429 sq ft, with a 95% confidence interval indicating that we are 95% confident that the true mean lies between 1034.91 and 1079.95 sq ft.
+- The mean SalePrice is $180,921.20, with a 95% confidence interval indicating that we are 95% confident that the true mean lies between $176,842.84 and $184,999.55.
+- The median values for both variables are lower than their means, suggesting a right-skewed distribution, as confirmed by the histograms.
+
+#### Histograms and Boxplots
+
+***TotalBsmtSF:**
+- The histogram shows a right-skewed distribution with most values concentrated between 500 and 1500 sq ft.
+- The boxplot confirms the right skewness with a few extreme outliers above 4000 sq ft.
+
+**SalePrice:**
+- The histogram shows a right-skewed distribution with most values concentrated between $100,000 and $200,000.
+- The boxplot confirms the right skewness with several extreme outliers above $400,000.
+
+#### Scatterplot
+The scatterplot of TotalBsmtSF vs. SalePrice shows a positive linear relationship.
+As TotalBsmtSF increases, SalePrice also tends to increase, though there is some variability
+
+#### Correlation Matrix
+- The correlation between TotalBsmtSF and SalePrice is 0.6135806, indicating a strong positive linear relationship.
+- The correlation between GrLivArea (Above grade living area) and SalePrice is even stronger at 0.7086245.
+- The correlation between TotalBsmtSF and GrLivArea is 0.4548682, indicating a moderate positive relationship.
+
+#### Hypothesis Testing for Correlation
+- The p-value is extremely small (< 2.2e-16), leading us to reject the null hypothesis that the true correlation is 0. This means there is a statistically significant positive correlation between TotalBsmtSF and SalePrice.
+- The 99% confidence interval for the correlation coefficient (0.5697562, 0.6539251) indicates that we are 99% confident that the true correlation lies within this range, further confirming a strong positive relationship.
+
+#### Summary and Discussion
+The analysis of TotalBsmtSF (Total square feet of basement area) and SalePrice reveals several key insights. Both variables are right-skewed with most values concentrated below their means and a few extreme outliers, particularly in SalePrice. There is a strong positive linear relationship between TotalBsmtSF and SalePrice, indicating that larger basement areas are associated with higher sale prices, suggesting buyers value additional basement space. The correlation is statistically significant, with a very low p-value and a strong positive correlation coefficient, and the confidence intervals for the means and the correlation coefficient further support the reliability of these estimates. Understanding this positive relationship can help homeowners and real estate agents make informed decisions about property investments and pricing strategies, and further analysis could explore additional factors influencing sale prices and their interactions with basement area and other home features.
+
+
+## V. Linear Algebra and Correlation
+
+### 1. Inverting the Correlation Matrix 'cor_matrix' and Matrix Multiplication
+```{r Invert_Matrix_Multiplication}
+# Inverting the correlation matrix to get the precision matrix
+precision_matrix <- solve(cor_matrix)
+print("Precision Matrix:")
+print(precision_matrix)
+
+# Multiplying the correlation matrix by the precision matrix
+identity_matrix_1 <- cor_matrix %*% precision_matrix
+print("Correlation Matrix * Precision Matrix:")
+print(identity_matrix_1)
+
+# Multiplying the precision matrix by the correlation matrix
+identity_matrix_2 <- precision_matrix %*% cor_matrix
+print("Precision Matrix * Correlation Matrix:")
+print(identity_matrix_2)
+```
+
+### 2. Principal Components Analysis (PCA)
+```{r Principal_Components_Analysis_PCA}
+# Performing PCA on the selected variables
+pca_result <- prcomp(train_data_selected, scale. = TRUE)
+summary(pca_result)
+
+# Printing the loadings (principal components)
+print("PCA Loadings:")
+print(pca_result$rotation)
+
+# Scree plot to visualize the explained variance by each principal component
+screeplot(pca_result, type = "lines", main = "Scree Plot")
+```
+
+
+
+###  Interpretation of PCA Analysis Results
+
+#### Precision Matrix
+\[
+\begin{bmatrix}
+  1.60588442 & -0.9394642 & -0.06473842 \\
+  -0.93946422 & 2.5582310 & -1.38549273 \\
+  -0.06473842 & -1.3854927 & 2.01124151
+\end{bmatrix}
+\]
+
+- The diagonal elements of the precision matrix represent the variance inflation factors (VIF) for each variable, indicating the extent of multicollinearity.
+
+- Off-diagonal elements represent the partial correlations between variables after accounting for the influence of other variables.
+
+
+#### Matrix Multiplication Results
+**Correlation Matrix * Precision Matrix**:
+\[
+\begin{bmatrix}
+  1.000000e+00 & 0 & 0 \\
+  0 & 1 & -2.220446e-16 \\
+  2.775558e-17 & 0 & 1.000000e+00
+\end{bmatrix}
+\]
+
+**Precision Matrix * Correlation Matrix**:
+\[
+\begin{bmatrix}
+  1.000000e+00 & 5.551115e-17 & 1.110223e-16 \\
+  -1.110223e-16 & 1.000000e+00 & -2.220446e-16 \\
+  0 & 0 & 1.000000e+00
+\end{bmatrix}
+\]
+
+- Both multiplications result in values close to the identity matrix, confirming the correctness of the precision matrix inversion.
+
+- The small non-zero off-diagonal elements are due to numerical precision limits.
+
+
+#### Principal Components Analysis (PCA)
+
+**Importance of Components**:
+\[
+\begin{array}{ccc}
+                          & \text{PC1} & \text{PC2} & \text{PC3} \\
+\text{Standard deviation} & 1.4801 & 0.7441 & 0.50553 \\
+\text{Proportion of Variance} & 0.7302 & 0.1846 & 0.08519 \\
+\text{Cumulative Proportion}  & 0.7302 & 0.9148 & 1.00000 \\
+\end{array}
+\]
+
+**PCA Loadings**:
+\[
+\begin{array}{cccc}
+                  & \text{PC1} & \text{PC2} & \text{PC3} \\
+\text{TotalBsmtSF} & 0.5376254 & 0.7878858 & -0.3003246 \\
+\text{SalePrice}   & 0.6182605 & -0.1261688 & 0.7757805 \\
+\text{GrLivArea}   & 0.5733349 & -0.6027582 & -0.5549502 \\
+\end{array}
+\]
+
+- PC1 captures 73.02% of the variance, indicating it is the most important component.
+
+- PC2 captures 18.46% of the variance, and PC3 captures 8.52%, together explaining 91.48% of the variance.
+
+- The loadings for PC1 show that all three variables (TotalBsmtSF, SalePrice, and GrLivArea) contribute significantly, with positive coefficients indicating they move together.
+
+- PC2 and PC3 help differentiate the variance not captured by PC1, with different weights indicating their unique contributions to explaining the data variance.
+
+**Scree Plot**:
+The scree plot shows a clear "elbow" after the first principal component (PC1), indicating that PC1 captures the most significant variance in the data.
+
+#### Summary and Discussion
+
+The PCA results reveal that the first principal component (PC1) captures the majority of the variance (73.02%) and is influenced by all three variables (`TotalBsmtSF`, `SalePrice`, and `GrLivArea`). This suggests a strong underlying factor that integrates these three variables, likely related to overall property size and value.
+
+The precision matrix provides insights into the relationships between variables, showing the variance inflation factors on the diagonal. The matrix multiplications confirm the accuracy of the inversion, showing identity matrices with small numerical precision errors.
+
+The scree plot indicates that retaining the first two principal components (explaining 91.48% of the variance) would be sufficient for a reduced-dimensionality representation of the data.
+
+These analyses provide a deeper understanding of the relationships between the variables, emphasizing the significance of basement area and living area in determining property prices.
+
+
+## VI. Calculus-Based Probability & Statistics
+
+### 1. Shift the Data
+```{r Shift_the_Data}
+# Shift TotalBsmtSF to ensure all values are above zero
+min_value <- min(train_data$TotalBsmtSF)
+if (min_value <= 0) {
+  train_data$TotalBsmtSF_shifted <- train_data$TotalBsmtSF - min_value + 1
+} else {
+  train_data$TotalBsmtSF_shifted <- train_data$TotalBsmtSF
+}
+```
+
+### 2. Fit an Exponential Distribution
+```{r Fit_an_Exponential_Distribution}
+# Fit an exponential distribution to the shifted TotalBsmtSF data
+fit <- fitdistr(train_data$TotalBsmtSF_shifted, "exponential")
+lambda <- fit$estimate
+print(paste("Estimated lambda:", lambda))
+```
+
+### 3. Sample from the Fitted Distribution and Histograms
+```{r Sample_from_the_Fitted_Distribution_Histogram}
+set.seed(05182024)
+# Generate 1000 samples from the fitted exponential distribution
+samples <- rexp(1000, rate = lambda)
+
+
+# Plot histogram of the original shifted TotalBsmtSF data
+hist(train_data$TotalBsmtSF_shifted, breaks = 30, main = "Histogram of Shifted TotalBsmtSF", xlab = "TotalBsmtSF_shifted")
+
+# Plot histogram of the sampled data
+hist(samples, breaks = 30, main = "Histogram of Sampled Data from Exponential Distribution", xlab = "Sampled Data")
+```
+
+
+### 4. Calculate Percentiles
+```{r Calculate_Percentiles}
+# Calculating 5th and 95th percentiles using the exponential distribution's CDF
+percentile_5_exp <- qexp(0.05, rate = lambda)
+percentile_95_exp <- qexp(0.95, rate = lambda)
+
+# Calculating 5th and 95th percentiles of the empirical data
+percentile_5_empirical <- quantile(train_data$TotalBsmtSF_shifted, 0.05)
+percentile_95_empirical <- quantile(train_data$TotalBsmtSF_shifted, 0.95)
+
+print(paste("5th percentile (exponential):", percentile_5_exp))
+print(paste("95th percentile (exponential):", percentile_95_exp))
+print(paste("5th percentile (empirical):", percentile_5_empirical))
+print(paste("95th percentile (empirical):", percentile_95_empirical))
+```
+### 5. Generate Confidence Intervals
+
+```{r Generate Confidence Intervals}
+# Generate a 95% confidence interval for the empirical data assuming normality
+mean_empirical <- mean(train_data$TotalBsmtSF_shifted)
+sd_empirical <- sd(train_data$TotalBsmtSF_shifted)
+ci_lower <- mean_empirical - qnorm(0.975) * (sd_empirical / sqrt(length(train_data$TotalBsmtSF_shifted)))
+ci_upper <- mean_empirical + qnorm(0.975) * (sd_empirical / sqrt(length(train_data$TotalBsmtSF_shifted)))
+
+print(paste("95% Confidence Interval for the mean of TotalBsmtSF (empirical): (", ci_lower, ", ", ci_upper, ")", sep = ""))
+```
+
+
+### Interpretation and Discussion
+
+#### Fit an Exponential Distribution
+
+**Estimated Lambda**:
+\[
+\lambda = 0.000944796082590709
+\]
+
+The estimated rate parameter (λ) for the exponential distribution is approximately 0.0009448. This parameter describes the rate at which the probability density decreases as the variable increases.
+
+#### Histograms
+
+- The histogram of the shifted TotalBsmtSF data shows a right-skewed distribution.
+
+- The histogram of the sampled data from the fitted exponential distribution should match the shape of the original data if the fit is good which is moderately the case here.
+
+
+#### Calculate Percentiles
+
+**Percentiles from Exponential Distribution**:
+
+- 5th Percentile: 54.29
+
+- 95th Percentile: 3170.77
+
+**Percentiles from Empirical Data**:
+
+- 5th Percentile: 520.3
+
+- 95th Percentile: 1754
+
+The 5th and 95th percentiles from the empirical data are 520.3 and 1754, respectively, compared to 54.29 and 3170.77 from the exponential distribution. This suggests that the exponential distribution may not perfectly fit the empirical data, particularly at the tails.
+
+#### Generate Confidence Intervals
+
+**95% Confidence Interval for the Mean of TotalBsmtSF (Empirical)**:
+\[
+(1035.93, 1080.93)
+\]
+
+The 95% confidence interval for the mean of TotalBsmtSF is between 1035.93 and 1080.93. This interval provides a range within which we are 95% confident that the true mean of the TotalBsmtSF lies, assuming normality.
+
+#### Summary and Discussion
+The analysis reveals several key insights: The estimated rate parameter (\(\lambda\)) for the exponential distribution shows a decreasing probability density as the basement area increases. While the exponential distribution captures the right skewness of `TotalBsmtSF`, the histograms and percentiles indicate it may not perfectly match the empirical data, especially at the tails. The 95% confidence interval for the mean basement area provides a reliable range, consistent with summary statistics. Understanding the distribution of `TotalBsmtSF` aids in assessing variability and central tendency, which is valuable for real estate analysis and decision-making. Further analysis with other distributions may be necessary for a more accurate fit.
+
+
+
+## VII. Modeling
+
+### 1. Data Preprocessing
+
+```{r Data_Preprocessing}
+# Load the data
+train_data <- read.csv("train.csv")
+test_data <- read.csv("test.csv")
+
+# Identify and handle missing values in both train and test datasets
+preprocess_data <- function(data) {
+  for (col in names(data)) {
+    if (is.numeric(data[[col]])) {
+      data[[col]][is.na(data[[col]])] <- median(data[[col]], na.rm = TRUE)
+    } else {
+      data[[col]][is.na(data[[col]])] <- as.character(mode(data[[col]]))
+    }
+  }
+  return(data)
+}
+
+train_data <- preprocess_data(train_data)
+test_data <- preprocess_data(test_data)
+
+# Remove target variable 'SalePrice' from training data for dummy variable creation
+train_data_no_target <- dplyr::select(train_data, -SalePrice)
+
+# Encode categorical variables using one-hot encoding
+dummies <- dummyVars("~ .", data = train_data_no_target)
+train_data_encoded <- predict(dummies, newdata = train_data_no_target)
+train_data_encoded <- as.data.frame(train_data_encoded)
+
+# Add the target variable back to the encoded training data
+train_data_encoded$SalePrice <- train_data$SalePrice
+
+# Encode the test data using the same dummyVars object
+test_data_encoded <- predict(dummies, newdata = test_data)
+test_data_encoded <- as.data.frame(test_data_encoded)
+
+# Ensure the 'Id' column is included in the test data
+test_data_encoded$Id <- test_data$Id
+
+# Ensure both datasets have the same columns
+common_columns <- intersect(names(train_data_encoded), names(test_data_encoded))
+train_data_encoded <- train_data_encoded[, common_columns]
+test_data_encoded <- test_data_encoded[, common_columns]
+
+# Scale the features for PCA
+train_data_scaled <- scale(train_data_encoded)
+test_data_scaled <- scale(test_data_encoded)
+
+# Perform PCA on the training data
+pca <- prcomp(train_data_scaled, center = TRUE, scale. = TRUE)
+#summary(pca)
+```
+
+
+### 2. Perform Principal Components
+
+```{r Perform_Principal_Components}
+# Plot the explained variance
+explained_variance <- cumsum(pca$sdev^2 / sum(pca$sdev^2))
+ggplot(data = data.frame(PC = 1:length(explained_variance), Variance = explained_variance), aes(x = PC, y = Variance)) +
+  geom_line() + 
+  geom_point() + 
+  labs(title = "Explained Variance by Principal Components", x = "Principal Component", y = "Cumulative Proportion of Variance Explained") +
+  theme_minimal()
+
+# Selecting the number of components that explain a sufficient amount of variance (e.g., 95%)
+num_components <- which(explained_variance >= 0.95)[1]
+print(paste("Number of components explaining 95% variance:", num_components))
+```
+
+
+
+
+###  3. Transform Data Using PCA
+```{r Transform_Data_Using_PCA}
+# Transform the training data using the selected number of principal components
+train_data_pca <- as.data.frame(pca$x[, 1:num_components])
+train_data_pca$SalePrice <- train_data$SalePrice
+
+# Apply the same transformation to the test data
+test_data_pca <- as.data.frame(predict(pca, newdata = test_data_scaled)[, 1:num_components])
+test_data_pca$Id <- test_data$Id
+```
+
+
+
+###  4. Build Regression Model
+```{r Build_Regression_Model}
+# Build a linear regression model using the principal components
+model_pca <- lm(SalePrice ~ ., data = train_data_pca)
+model_summary <- summary(model_pca)
+
+# Extract the required metrics
+residual_standard_error <- model_summary$sigma
+multiple_r_squared <- model_summary$r.squared
+adjusted_r_squared <- model_summary$adj.r.squared
+f_statistic <- model_summary$fstatistic[1]
+df1 <- model_summary$fstatistic[2]
+df2 <- model_summary$fstatistic[3]
+p_value <- pf(f_statistic, df1, df2, lower.tail = FALSE)
+
+# Create a list of the extracted metrics
+metrics_list <- list(
+  Residual_Standard_Error = residual_standard_error,
+  Multiple_R_Squared = multiple_r_squared,
+  Adjusted_R_Squared = adjusted_r_squared,
+  F_Statistic = f_statistic,
+  Degrees_of_Freedom1 = df1,
+  Degrees_of_Freedom2 = df2,
+  P_Value = p_value
+)
+
+# Print the list of metrics
+print(metrics_list)
+
+# Check for multicollinearity using VIF
+vif_values_pca <- vif(model_pca)
+head(vif_values_pca)
+```
+
+
+### 5. Make Predictions on Test Data
+```{r Make_Predictions_on_Test_Data}
+# Predict on the test data
+predictions <- predict(model_pca, newdata = test_data_pca)
+
+# Ensure predictions are not negative (SalePrice should be >= 0)
+predictions <- pmax(predictions, 0)
+
+# Prepare the submission dataframe
+submission <- data.frame(Id = test_data_pca$Id, SalePrice = predictions)
+head(submission)
+
+# Write the submission file to CSV
+write.csv(submission, "submission.csv", row.names = FALSE)
+```
+
+
+
+* * *
